@@ -3,36 +3,61 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a status sheet. Summary band, then one horizontal pipeline of build phases,
+  /* Layout: a status sheet. Summary band, then one horizontal pipeline of build phases,
    then the product's own steps, then repo cards and the open items. Tokens follow
    orgportal's _ws-design-system-v2 (primary #1c5d95, FRAC table blue #dfedf9). */
-:root {
-  --bg: #f6f8fb;
-  --surface: #ffffff;
-  --ink: #111827;
-  --muted: #5b6676;
-  --line: #dde3eb;
-  --primary: #1c5d95;
-  --primary-tint: #e6f0f9;
-  --head: #dfedf9;
-  --done: #157a43;
-  --done-bg: #ddf3e6;
-  --now: #1c5d95;
-  --now-bg: #dcebf8;
-  --blocked: #b42318;
-  --blocked-bg: #fde4e1;
-  --todo: #6b7280;
-  --todo-bg: #eef0f3;
-  --warn: #92400e;
-  --warn-bg: #fdf0d5;
-  --font-body: 'Inter', 'Roboto', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-  --radius: 8px;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root {
+    --bg: #f6f8fb;
+    --surface: #ffffff;
+    --ink: #111827;
+    --muted: #5b6676;
+    --line: #dde3eb;
+    --primary: #1c5d95;
+    --primary-tint: #e6f0f9;
+    --head: #dfedf9;
+    --done: #157a43;
+    --done-bg: #ddf3e6;
+    --now: #1c5d95;
+    --now-bg: #dcebf8;
+    --blocked: #b42318;
+    --blocked-bg: #fde4e1;
+    --todo: #6b7280;
+    --todo-bg: #eef0f3;
+    --warn: #92400e;
+    --warn-bg: #fdf0d5;
+    --font-body: 'Inter', 'Roboto', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    --radius: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0f151c;
+      --surface: #16202a;
+      --ink: #e6ebf1;
+      --muted: #9aa7b6;
+      --line: #2a3644;
+      --primary: #79b4e8;
+      --primary-tint: #1a2d40;
+      --head: #1c3247;
+      --done: #6fd39a;
+      --done-bg: #173325;
+      --now: #8cc2f0;
+      --now-bg: #1b3550;
+      --blocked: #ff8f84;
+      --blocked-bg: #3d1d1b;
+      --todo: #9aa3ae;
+      --todo-bg: #222c37;
+      --warn: #f2c26b;
+      --warn-bg: #3a2c12;
+    }
+  }
+
+  :root[data-theme="dark"] {
     color-scheme: dark;
     --bg: #0f151c;
     --surface: #16202a;
@@ -53,274 +78,754 @@
     --warn: #f2c26b;
     --warn-bg: #3a2c12;
   }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #0f151c;
-  --surface: #16202a;
-  --ink: #e6ebf1;
-  --muted: #9aa7b6;
-  --line: #2a3644;
-  --primary: #79b4e8;
-  --primary-tint: #1a2d40;
-  --head: #1c3247;
-  --done: #6fd39a;
-  --done-bg: #173325;
-  --now: #8cc2f0;
-  --now-bg: #1b3550;
-  --blocked: #ff8f84;
-  --blocked-bg: #3d1d1b;
-  --todo: #9aa3ae;
-  --todo-bg: #222c37;
-  --warn: #f2c26b;
-  --warn-bg: #3a2c12;
-}
 
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.55;
-}
-.wrap {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding-block: 40px 64px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-h1, h2, h3 { text-wrap: balance; margin: 0; }
-h1 { font-size: clamp(28px, 4vw, 38px); font-weight: 600; letter-spacing: -0.01em; }
-h2 { font-size: 20px; font-weight: 600; }
-h3 { font-size: 15px; font-weight: 600; }
-p { margin: 0; }
-code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
-.eyebrow {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.section { display: flex; flex-direction: column; gap: 16px; }
-.section-head { display: flex; flex-direction: column; gap: 4px; }
-.section-head p { color: var(--muted); max-width: 70ch; }
+  * {
+    box-sizing: border-box;
+  }
 
-/* status pills */
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.s-done { color: var(--done); background: var(--done-bg); }
-.s-now { color: var(--now); background: var(--now-bg); }
-.s-blocked { color: var(--blocked); background: var(--blocked-bg); }
-.s-todo { color: var(--todo); background: var(--todo-bg); }
-.s-warn { color: var(--warn); background: var(--warn-bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+  }
 
-/* header + summary */
-header { display: flex; flex-direction: column; gap: 10px; }
-header .lede { color: var(--muted); max-width: 72ch; font-size: 16px; }
-.summary {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 24px;
-  padding: 24px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-.here { display: flex; flex-direction: column; gap: 10px; }
-.here .big { font-size: 22px; font-weight: 600; }
-.here p { color: var(--muted); }
-.meter { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
-.bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--todo-bg); }
-.bar span { display: block; height: 100%; }
-.bar .b-done { background: var(--done); }
-.bar .b-now { background: var(--now); }
-.bar .b-blocked { background: var(--blocked); }
-.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); }
-.legend b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding-block: 40px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
 
-/* phase pipeline */
-.pipeline {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 0;
-  overflow-x: auto;
-}
-.phase { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 0 10px 0 0; min-width: 132px; }
-.phase .node-row { display: flex; align-items: center; }
-.node {
-  width: 34px; height: 34px; flex-shrink: 0;
-  border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px;
-  border: 2px solid currentColor;
-  background: var(--surface);
-  font-variant-numeric: tabular-nums;
-}
-.phase .rail { flex: 1; height: 3px; background: var(--line); margin-left: 6px; border-radius: 2px; }
-.phase:last-child .rail { display: none; }
-.phase.done .node { color: var(--done); background: var(--done-bg); }
-.phase.done .rail { background: var(--done); }
-.phase.now .node { color: var(--now); background: var(--now); color: #fff; border-color: var(--now); box-shadow: 0 0 0 5px var(--now-bg); }
-.phase.blocked .node { color: var(--blocked); background: var(--blocked-bg); }
-.phase.todo .node { color: var(--todo); }
-.phase h3 { font-size: 14px; }
-.phase p { font-size: 13px; color: var(--muted); }
-.phase .where { font-size: 12px; font-family: var(--font-mono); color: var(--muted); }
-.you-are-here {
-  align-self: flex-start;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--now);
-}
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    margin: 0;
+  }
 
-/* product steps */
-.flows { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; }
-.flow {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px;
-  display: flex; flex-direction: column; gap: 14px;
-}
-.flow-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.flow-head span { font-size: 13px; color: var(--muted); }
-.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.step {
-  display: grid;
-  grid-template-columns: 28px 1fr auto;
-  gap: 12px;
-  align-items: start;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
-}
-.step:first-child { border-top: 0; }
-.step .n {
-  width: 24px; height: 24px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; background: var(--todo-bg); color: var(--todo);
-  font-variant-numeric: tabular-nums;
-}
-.step.ok .n { background: var(--done-bg); color: var(--done); }
-.step.ai .n { background: var(--blocked-bg); color: var(--blocked); }
-.step.part .n { background: var(--warn-bg); color: var(--warn); }
-.step b { font-weight: 600; }
-.step p { font-size: 13px; color: var(--muted); }
+  h1 {
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
 
-/* architecture strip */
-.arch { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; align-items: stretch; overflow-x: auto; }
-.tier {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px;
-  display: flex; flex-direction: column; gap: 8px;
-  min-width: 200px;
-}
-.arch-cell { display: flex; align-items: stretch; }
-.arch-cell + .arch-cell::before {
-  content: "→";
-  display: flex; align-items: center; justify-content: center;
-  width: 28px; flex-shrink: 0;
-  color: var(--muted); font-size: 18px;
-}
-.arch-cell .tier { flex: 1; }
-.tier .path { font-family: var(--font-mono); font-size: 12px; color: var(--primary); word-break: break-all; }
-.tier p { font-size: 13px; color: var(--muted); }
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+  }
 
-/* repos table */
-.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px; }
-th { background: var(--head); text-align: left; font-weight: 600; padding: 10px 14px; font-size: 13px; }
-td { padding: 10px 14px; border-top: 1px solid var(--line); vertical-align: top; }
-td .mono { color: var(--primary); }
-td p { color: var(--muted); font-size: 13px; }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+  }
 
-/* open items */
-.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.list {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 18px 20px;
-  display: flex; flex-direction: column; gap: 12px;
-}
-.list ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
-.list li span { color: var(--muted); }
-.list.blockers { border-top: 4px solid var(--blocked); }
-.list.yours { border-top: 4px solid var(--now); }
-.list.mine { border-top: 4px solid var(--todo); }
-footer { color: var(--muted); font-size: 13px; }
+  p {
+    margin: 0;
+  }
 
-/* review flow diagram */
-.flowfig {
-  margin: 0;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px;
-  display: flex; flex-direction: column; gap: 12px;
-}
-.flowfig .scroll { overflow-x: auto; }
-.flowfig svg { display: block; width: 100%; min-width: 820px; height: auto; }
-.flowfig figcaption { color: var(--muted); font-size: 13px; max-width: 80ch; }
-.bx { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
-.bx-key { fill: var(--primary-tint); stroke: var(--primary); stroke-width: 1.5; }
-.bx-check { fill: var(--head); stroke: var(--primary); stroke-width: 1.5; }
-.bx-err { fill: var(--blocked-bg); stroke: var(--blocked); stroke-width: 1.5; }
-.bx-ai { fill: var(--warn-bg); stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 6 4; }
-.bx-job { fill: var(--surface); stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 3 3; }
-.tt { fill: var(--ink); font: 600 13px var(--font-body); }
-.ts { fill: var(--muted); font: 400 11.5px var(--font-body); }
-.te { fill: var(--blocked); font: 600 12px var(--font-body); }
-.tw { fill: var(--warn); font: 600 13px var(--font-body); }
-.tl { fill: var(--muted); font: 500 10.5px var(--font-mono); }
-.ln { stroke: var(--muted); stroke-width: 1.5; fill: none; }
-.ln-err { stroke: var(--blocked); stroke-width: 1.5; fill: none; }
-.ln-dash { stroke: var(--muted); stroke-width: 1.2; fill: none; stroke-dasharray: 3 3; }
-.ah { fill: var(--muted); }
-.ah-err { fill: var(--blocked); }
+  code,
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+  }
 
-/* check rules table */
-.rules td:first-child { white-space: nowrap; font-weight: 600; }
-.rules td ul { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
-.sev { display: inline-block; min-width: 22px; text-align: center; padding: 0 6px; border-radius: 4px; font-size: 12px; font-weight: 700; font-family: var(--font-mono); }
-.sev-B { color: var(--blocked); background: var(--blocked-bg); }
-.sev-M { color: var(--warn); background: var(--warn-bg); }
-.sev-m { color: var(--todo); background: var(--todo-bg); }
-.tiles { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--muted); }
-.tiles b { color: var(--ink); }
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 
-@media (max-width: 980px) {
-  .summary, .flows { grid-template-columns: 1fr; }
-  .cols { grid-template-columns: 1fr; }
-  .pipeline { grid-template-columns: repeat(8, 150px); }
-}
-@media (max-width: 600px) {
-  .wrap { gap: 32px; padding-block: 24px 48px; }
-  .arch { grid-template-columns: repeat(4, 220px); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .phase.now .node { animation: pulse 2.4s ease-in-out infinite; }
-  @keyframes pulse { 50% { box-shadow: 0 0 0 9px var(--now-bg); } }
-}
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .section-head p {
+    color: var(--muted);
+    max-width: 70ch;
+  }
+
+  /* status pills */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .pill::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .s-done {
+    color: var(--done);
+    background: var(--done-bg);
+  }
+
+  .s-now {
+    color: var(--now);
+    background: var(--now-bg);
+  }
+
+  .s-blocked {
+    color: var(--blocked);
+    background: var(--blocked-bg);
+  }
+
+  .s-todo {
+    color: var(--todo);
+    background: var(--todo-bg);
+  }
+
+  .s-warn {
+    color: var(--warn);
+    background: var(--warn-bg);
+  }
+
+  /* header + summary */
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  header .lede {
+    color: var(--muted);
+    max-width: 72ch;
+    font-size: 16px;
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .here {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .here .big {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .here p {
+    color: var(--muted);
+  }
+
+  .meter {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .bar {
+    display: flex;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--todo-bg);
+  }
+
+  .bar span {
+    display: block;
+    height: 100%;
+  }
+
+  .bar .b-done {
+    background: var(--done);
+  }
+
+  .bar .b-now {
+    background: var(--now);
+  }
+
+  .bar .b-blocked {
+    background: var(--blocked);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .legend b {
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* phase pipeline */
+  .pipeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 0;
+    overflow-x: auto;
+  }
+
+  .phase {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 10px 0 0;
+    min-width: 132px;
+  }
+
+  .phase .node-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .node {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    border: 2px solid currentColor;
+    background: var(--surface);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .phase .rail {
+    flex: 1;
+    height: 3px;
+    background: var(--line);
+    margin-left: 6px;
+    border-radius: 2px;
+  }
+
+  .phase:last-child .rail {
+    display: none;
+  }
+
+  .phase.done .node {
+    color: var(--done);
+    background: var(--done-bg);
+  }
+
+  .phase.done .rail {
+    background: var(--done);
+  }
+
+  .phase.now .node {
+    color: var(--now);
+    background: var(--now);
+    color: #fff;
+    border-color: var(--now);
+    box-shadow: 0 0 0 5px var(--now-bg);
+  }
+
+  .phase.blocked .node {
+    color: var(--blocked);
+    background: var(--blocked-bg);
+  }
+
+  .phase.todo .node {
+    color: var(--todo);
+  }
+
+  .phase h3 {
+    font-size: 14px;
+  }
+
+  .phase p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .phase .where {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+  }
+
+  .you-are-here {
+    align-self: flex-start;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--now);
+  }
+
+  /* product steps */
+  .flows {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 24px;
+  }
+
+  .flow {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .flow-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .flow-head span {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 12px;
+    align-items: start;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .step:first-child {
+    border-top: 0;
+  }
+
+  .step .n {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    background: var(--todo-bg);
+    color: var(--todo);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .step.ok .n {
+    background: var(--done-bg);
+    color: var(--done);
+  }
+
+  .step.ai .n {
+    background: var(--blocked-bg);
+    color: var(--blocked);
+  }
+
+  .step.part .n {
+    background: var(--warn-bg);
+    color: var(--warn);
+  }
+
+  .step b {
+    font-weight: 600;
+  }
+
+  .step p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* architecture strip */
+  .arch {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    align-items: stretch;
+    overflow-x: auto;
+  }
+
+  .tier {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 200px;
+  }
+
+  .arch-cell {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .arch-cell+.arch-cell::before {
+    content: "→";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 18px;
+  }
+
+  .arch-cell .tier {
+    flex: 1;
+  }
+
+  .tier .path {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--primary);
+    word-break: break-all;
+  }
+
+  .tier p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* repos table */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 760px;
+  }
+
+  th {
+    background: var(--head);
+    text-align: left;
+    font-weight: 600;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  td {
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  td .mono {
+    color: var(--primary);
+  }
+
+  td p {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* open items */
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .list {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .list ul {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .list li span {
+    color: var(--muted);
+  }
+
+  .list.blockers {
+    border-top: 4px solid var(--blocked);
+  }
+
+  .list.yours {
+    border-top: 4px solid var(--now);
+  }
+
+  .list.mine {
+    border-top: 4px solid var(--todo);
+  }
+
+  footer {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* review flow diagram */
+  .flowfig {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .flowfig .scroll {
+    overflow-x: auto;
+  }
+
+  .flowfig svg {
+    display: block;
+    width: 100%;
+    min-width: 820px;
+    height: auto;
+  }
+
+  .flowfig figcaption {
+    color: var(--muted);
+    font-size: 13px;
+    max-width: 80ch;
+  }
+
+  .bx {
+    fill: var(--surface);
+    stroke: var(--line);
+    stroke-width: 1.5;
+  }
+
+  .bx-key {
+    fill: var(--primary-tint);
+    stroke: var(--primary);
+    stroke-width: 1.5;
+  }
+
+  .bx-check {
+    fill: var(--head);
+    stroke: var(--primary);
+    stroke-width: 1.5;
+  }
+
+  .bx-err {
+    fill: var(--blocked-bg);
+    stroke: var(--blocked);
+    stroke-width: 1.5;
+  }
+
+  .bx-ai {
+    fill: var(--warn-bg);
+    stroke: var(--warn);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+  }
+
+  .bx-job {
+    fill: var(--surface);
+    stroke: var(--muted);
+    stroke-width: 1.2;
+    stroke-dasharray: 3 3;
+  }
+
+  .tt {
+    fill: var(--ink);
+    font: 600 13px var(--font-body);
+  }
+
+  .ts {
+    fill: var(--muted);
+    font: 400 11.5px var(--font-body);
+  }
+
+  .te {
+    fill: var(--blocked);
+    font: 600 12px var(--font-body);
+  }
+
+  .tw {
+    fill: var(--warn);
+    font: 600 13px var(--font-body);
+  }
+
+  .tl {
+    fill: var(--muted);
+    font: 500 10.5px var(--font-mono);
+  }
+
+  .ln {
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .ln-err {
+    stroke: var(--blocked);
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .ln-dash {
+    stroke: var(--muted);
+    stroke-width: 1.2;
+    fill: none;
+    stroke-dasharray: 3 3;
+  }
+
+  .ah {
+    fill: var(--muted);
+  }
+
+  .ah-err {
+    fill: var(--blocked);
+  }
+
+  /* check rules table */
+  .rules td:first-child {
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .rules td ul {
+    margin: 0;
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .sev {
+    display: inline-block;
+    min-width: 22px;
+    text-align: center;
+    padding: 0 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+
+  .sev-B {
+    color: var(--blocked);
+    background: var(--blocked-bg);
+  }
+
+  .sev-M {
+    color: var(--warn);
+    background: var(--warn-bg);
+  }
+
+  .sev-m {
+    color: var(--todo);
+    background: var(--todo-bg);
+  }
+
+  .tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .tiles b {
+    color: var(--ink);
+  }
+
+  @media (max-width: 980px) {
+
+    .summary,
+    .flows {
+      grid-template-columns: 1fr;
+    }
+
+    .cols {
+      grid-template-columns: 1fr;
+    }
+
+    .pipeline {
+      grid-template-columns: repeat(8, 150px);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .wrap {
+      gap: 32px;
+      padding-block: 24px 48px;
+    }
+
+    .arch {
+      grid-template-columns: repeat(4, 220px);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .phase.now .node {
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      50% {
+        box-shadow: 0 0 0 9px var(--now-bg);
+      }
+    }
+  }
 </style>
 
 <div class="wrap">
@@ -338,10 +843,12 @@ footer { color: var(--muted); font-size: 13px; }
       <p>The portal, the proxy route and the service with its AI layer are built, committed and pushed. The whole
         Creator and Reviewer flow runs on Claude Sonnet 5.5: a standard FRAC costs about $0.95 and takes about
         4 minutes (three complete FRACs run, $3.88 billed 6–9 Nov). Since 6 Nov: review rules tuned (sentences that rule
-        an act out are no longer Blockers, "family planning" is not a KCM name), the expert check asks for a re-run after
+        an act out are no longer Blockers, "family planning" is not a KCM name), the expert check asks for a re-run
+        after
         a fix or an edit, one running job per FRAC, a $3 spending limit per job, and cost and review reports. On 11 Nov
         the eight review decisions were built: documents and templates, position matching, the agent choosing the size,
-        a roles preview popup, View Source links, a draft Excel before the expert check, and "Agent" and "Position" wording. They are not committed yet. With
+        a roles preview popup, View Source links, a draft Excel before the expert check, and "Agent" and "Position"
+        wording. They are not committed yet. With
         standard sheets a FRAC can cost about $0.30 instead of $0.96. What remains is clinical sign-off, the
         real-workbook acceptance tests and the in-app checks below.</p>
       <div><span class="pill s-now">Testing · waiting on clinical sign-off</span></div>
@@ -378,7 +885,8 @@ footer { color: var(--muted); font-size: 13px; }
         <p>Workbook parser, computed checks, report, Excel in and out. Rebuilt to rules r3: rule-based checks, Vidya's
           fixed checklist with quoted flags, a computed verdict and "same file, same review". Status per rule in
           <code>R3_GAP_ANALYSIS.md</code>, next to <code>FRAC_Creator_and_Reviewer_spec.md</code> and
-          <code>FRAC_Reviewer_rules_r3.md</code> in this folder.</p>
+          <code>FRAC_Reviewer_rules_r3.md</code> in this folder.
+        </p>
         <span class="where">df10412 · r3 127ddc7</span>
         <span class="pill s-done">Done</span>
       </li>
@@ -437,26 +945,83 @@ footer { color: var(--muted); font-size: 13px; }
     </div>
     <div class="flows">
       <div class="flow">
-        <div class="flow-head"><h3>Create FRAC</h3><span>spec §5 · 5 of 6 usable</span></div>
+        <div class="flow-head">
+          <h3>Create FRAC</h3><span>spec §5 · 5 of 6 usable</span>
+        </div>
         <ol class="steps">
-          <li class="step ok"><span class="n">1</span><div><b>Brief</b><p>Position, state and scope, plus an optional job description or order. The position is matched exactly against your FRACs, then Positions, and a match can supply the postings and roles. The agent chooses the size. Locks once research exists.</p></div><span class="pill s-done">Works</span></li>
-          <li class="step ok"><span class="n">2</span><div><b>Job research</b><p>"Research the job" or fill in by hand; revise with feedback. Reads attached documents first (1 search, not 3). A Sources sheet turns search off. Sources link to the pages search opened (View source). Imported FRACs skip it.</p></div><span class="pill s-done">Works (Claude)</span></li>
-          <li class="step ok"><span class="n">3</span><div><b>Roles &amp; activities</b><p>AI drafts in batches, then edit by hand; team-added activities survive a revise. With a Roles sheet or a matched position, only empty roles get activities.</p></div><span class="pill s-done">Works (Claude)</span></li>
-          <li class="step ok"><span class="n">4</span><div><b>Competencies</b><p>Derive / re-derive with AI, every activity mapped; editable table with Used by and D/F/B counts. With a Competencies sheet the AI only maps activities to it.</p></div><span class="pill s-done">Works (Claude)</span></li>
-          <li class="step ok"><span class="n">5</span><div><b>Level ladders</b><p>Write missing, rewrite all, or revise one competency; edit any level by hand. Ladders from a sheet are kept. "Preview roles" opens a popup of each role with its competencies and levels once every activity is mapped.</p></div><span class="pill s-done">Works (Claude)</span></li>
-          <li class="step ok"><span class="n">6</span><div><b>Expert check &amp; download</b><p>Rule-based checks plus the agent's quoted checklist; "Fix these competencies" (ladders only for now); "Download draft Excel" beside the check to confirm the file first; after a fix or edit the check asks for a re-run, and a download meanwhile is a draft without the old findings.</p></div><span class="pill s-done">Works (Claude)</span></li>
+          <li class="step ok"><span class="n">1</span>
+            <div><b>Brief</b>
+              <p>Position, state and scope, plus an optional job description or order. The position is matched exactly
+                against your FRACs, then Positions, and a match can supply the postings and roles. The agent chooses the
+                size. Locks once research exists.</p>
+            </div><span class="pill s-done">Works</span>
+          </li>
+          <li class="step ok"><span class="n">2</span>
+            <div><b>Job research</b>
+              <p>"Research the job" or fill in by hand; revise with feedback. Reads attached documents first (1 search,
+                not 3). A Sources sheet turns search off. Sources link to the pages search opened (View source).
+                Imported FRACs skip it.</p>
+            </div><span class="pill s-done">Works (Claude)</span>
+          </li>
+          <li class="step ok"><span class="n">3</span>
+            <div><b>Roles &amp; activities</b>
+              <p>AI drafts in batches, then edit by hand; team-added activities survive a revise. With a Roles sheet or
+                a matched position, only empty roles get activities.</p>
+            </div><span class="pill s-done">Works (Claude)</span>
+          </li>
+          <li class="step ok"><span class="n">4</span>
+            <div><b>Competencies</b>
+              <p>Derive / re-derive with AI, every activity mapped; editable table with Used by and D/F/B counts. With a
+                Competencies sheet the AI only maps activities to it.</p>
+            </div><span class="pill s-done">Works (Claude)</span>
+          </li>
+          <li class="step ok"><span class="n">5</span>
+            <div><b>Level ladders</b>
+              <p>Write missing, rewrite all, or revise one competency; edit any level by hand. Ladders from a sheet are
+                kept. "Preview roles" opens a popup of each role with its competencies and levels once every activity is
+                mapped.</p>
+            </div><span class="pill s-done">Works (Claude)</span>
+          </li>
+          <li class="step ok"><span class="n">6</span>
+            <div><b>Expert check &amp; download</b>
+              <p>Rule-based checks plus the agent's quoted checklist; "Fix these competencies" (ladders only for now);
+                "Download draft Excel" beside the check to confirm the file first; after a fix or edit the check asks
+                for a re-run, and a download meanwhile is a draft without the old findings.</p>
+            </div><span class="pill s-done">Works (Claude)</span>
+          </li>
         </ol>
       </div>
       <div class="flow">
-        <div class="flow-head"><h3>Review a FRAC</h3><span>spec §6 · 3 of 3 usable</span></div>
+        <div class="flow-head">
+          <h3>Review a FRAC</h3><span>spec §6 · 3 of 3 usable</span>
+        </div>
         <ol class="steps">
-          <li class="step ok"><span class="n">1</span><div><b>Upload FRAC</b><p>Tolerant .xlsx parser: Hindi sheets skipped, "Comptency" typo, every mapping-cell style.</p></div><span class="pill s-done">Works</span></li>
-          <li class="step ok"><span class="n">2</span><div><b>Context</b><p>Cadre, state or "Not state-specific", reviewer notes.</p></div><span class="pill s-done">Works</span></li>
-          <li class="step ok"><span class="n">3</span><div><b>Review report</b><p>5 check tiles, rule-based and quoted AI findings, computed verdict, download, open in Creator; same file returns the saved review.</p></div><span class="pill s-done">Works (Claude)</span></li>
+          <li class="step ok"><span class="n">1</span>
+            <div><b>Upload FRAC</b>
+              <p>Tolerant .xlsx parser: Hindi sheets skipped, "Comptency" typo, every mapping-cell style.</p>
+            </div><span class="pill s-done">Works</span>
+          </li>
+          <li class="step ok"><span class="n">2</span>
+            <div><b>Context</b>
+              <p>Cadre, state or "Not state-specific", reviewer notes.</p>
+            </div><span class="pill s-done">Works</span>
+          </li>
+          <li class="step ok"><span class="n">3</span>
+            <div><b>Review report</b>
+              <p>5 check tiles, rule-based and quoted AI findings, computed verdict, download, open in Creator; same
+                file returns the saved review.</p>
+            </div><span class="pill s-done">Works (Claude)</span>
+          </li>
         </ol>
-        <div class="flow-head"><h3>My FRACs</h3><span>spec §1</span></div>
+        <div class="flow-head">
+          <h3>My FRACs</h3><span>spec §1</span>
+        </div>
         <ol class="steps">
-          <li class="step ok"><span class="n">✓</span><div><b>Library</b><p>Saved FRACs and past reviews, worst finding per row, reopen either.</p></div><span class="pill s-done">Works</span></li>
+          <li class="step ok"><span class="n">✓</span>
+            <div><b>Library</b>
+              <p>Saved FRACs and past reviews, worst finding per row, reopen either.</p>
+            </div><span class="pill s-done">Works</span>
+          </li>
         </ol>
       </div>
     </div>
@@ -470,160 +1035,170 @@ footer { color: var(--muted); font-size: 13px; }
     </div>
     <figure class="flowfig">
       <div class="scroll">
-        <svg viewBox="0 0 1100 945" role="img" aria-label="Review flow: an upload or an expert check passes through the uiproxy, becomes a review model, runs five computed checks, then the AI review, is merged into one report, saved, and shown, downloaded or opened in the Creator.">
+        <svg viewBox="0 0 1100 945" role="img"
+          aria-label="Review flow: an upload or an expert check passes through the uiproxy, becomes a review model, runs five computed checks, then the AI review, is merged into one report, saved, and shown, downloaded or opened in the Creator.">
           <defs>
-            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" class="ah"/>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+              orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="ah" />
             </marker>
-            <marker id="ah-err" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" class="ah-err"/>
+            <marker id="ah-err" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+              orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="ah-err" />
             </marker>
           </defs>
 
           <!-- 1. entry points -->
-          <rect class="bx-key" x="60" y="20" width="420" height="56" rx="6"/>
+          <rect class="bx-key" x="60" y="20" width="420" height="56" rx="6" />
           <text class="tt" x="270" y="42" text-anchor="middle">Review a FRAC</text>
           <text class="ts" x="270" y="61" text-anchor="middle">upload .xlsx + optional cadre, state, notes</text>
-          <rect class="bx-key" x="620" y="20" width="420" height="56" rx="6"/>
+          <rect class="bx-key" x="620" y="20" width="420" height="56" rx="6" />
           <text class="tt" x="830" y="42" text-anchor="middle">Create FRAC · step 6</text>
           <text class="ts" x="830" y="61" text-anchor="middle">Run expert check on a saved FRAC</text>
 
-          <line class="ln" x1="270" y1="76" x2="270" y2="118" marker-end="url(#ah)"/>
+          <line class="ln" x1="270" y1="76" x2="270" y2="118" marker-end="url(#ah)" />
           <text class="tl" x="280" y="102">POST /frac-reviews (multipart)</text>
-          <line class="ln" x1="830" y1="76" x2="830" y2="118" marker-end="url(#ah)"/>
+          <line class="ln" x1="830" y1="76" x2="830" y2="118" marker-end="url(#ah)" />
           <text class="tl" x="840" y="102">POST /fracs/:id/steps/check</text>
 
           <!-- 2. proxy -->
-          <rect class="bx" x="60" y="120" width="980" height="56" rx="6"/>
+          <rect class="bx" x="60" y="120" width="980" height="56" rx="6" />
           <text class="tt" x="550" y="142" text-anchor="middle">uiproxy · /protected/v8/fracStudio/*</text>
-          <text class="ts" x="550" y="161" text-anchor="middle">whitelist check → owner from the login session as x-aastrika-creator → upload rebuilt → frac-studio-service /v1</text>
+          <text class="ts" x="550" y="161" text-anchor="middle">whitelist check → owner from the login session as
+            x-user-id → upload rebuilt → frac-studio-service /v1</text>
 
-          <line class="ln" x1="240" y1="176" x2="240" y2="218" marker-end="url(#ah)"/>
-          <line class="ln" x1="830" y1="176" x2="830" y2="218" marker-end="url(#ah)"/>
+          <line class="ln" x1="240" y1="176" x2="240" y2="218" marker-end="url(#ah)" />
+          <line class="ln" x1="830" y1="176" x2="830" y2="218" marker-end="url(#ah)" />
 
           <!-- 3. build the review model -->
-          <rect class="bx" x="60" y="220" width="360" height="64" rx="6"/>
+          <rect class="bx" x="60" y="220" width="360" height="64" rx="6" />
           <text class="tt" x="240" y="243" text-anchor="middle">Read workbook · parseWorkbook</text>
           <text class="ts" x="240" y="262" text-anchor="middle">skip Hindi sheets · find competency</text>
           <text class="ts" x="240" y="277" text-anchor="middle">and FRAC sheets · parse mapping cells</text>
-          <line class="ln-err" x1="420" y1="252" x2="438" y2="252" marker-end="url(#ah-err)"/>
-          <rect class="bx-err" x="440" y="226" width="150" height="52" rx="6"/>
+          <line class="ln-err" x1="420" y1="252" x2="438" y2="252" marker-end="url(#ah-err)" />
+          <rect class="bx-err" x="440" y="226" width="150" height="52" rx="6" />
           <text class="te" x="515" y="248" text-anchor="middle">400 · stops here</text>
           <text class="ts" x="515" y="266" text-anchor="middle">no competency sheet</text>
           <text class="ts" x="60" y="302">no FRAC sheet → warning, structure and coverage checks limited</text>
 
-          <rect class="bx" x="620" y="220" width="420" height="64" rx="6"/>
+          <rect class="bx" x="620" y="220" width="420" height="64" rx="6" />
           <text class="tt" x="830" y="243" text-anchor="middle">fracToModel</text>
           <text class="ts" x="830" y="262" text-anchor="middle">reads every ref in a mapping cell</text>
           <text class="ts" x="830" y="277" text-anchor="middle">(C1@L3, C2), not just the first</text>
 
-          <polyline class="ln" points="240,284 240,288 240,316 450,316 450,328" marker-end="url(#ah)"/>
-          <polyline class="ln" points="830,284 830,316 650,316 650,328" marker-end="url(#ah)"/>
+          <polyline class="ln" points="240,284 240,288 240,316 450,316 450,328" marker-end="url(#ah)" />
+          <polyline class="ln" points="830,284 830,316 650,316 650,328" marker-end="url(#ah)" />
 
           <!-- 4. review model + job -->
-          <rect class="bx-key" x="290" y="330" width="480" height="56" rx="6"/>
+          <rect class="bx-key" x="290" y="330" width="480" height="56" rx="6" />
           <text class="tt" x="530" y="352" text-anchor="middle">Review model</text>
-          <text class="ts" x="530" y="371" text-anchor="middle">roles · activities · refs · competencies · L1–L5 · postings</text>
-          <line class="ln-dash" x1="770" y1="358" x2="830" y2="358"/>
-          <rect class="bx-job" x="830" y="323" width="210" height="70" rx="6"/>
+          <text class="ts" x="530" y="371" text-anchor="middle">roles · activities · refs · competencies · L1–L5 ·
+            postings</text>
+          <line class="ln-dash" x1="770" y1="358" x2="830" y2="358" />
+          <rect class="bx-job" x="830" y="323" width="210" height="70" rx="6" />
           <text class="tt" x="935" y="344" text-anchor="middle">Background job</text>
           <text class="ts" x="935" y="362" text-anchor="middle">202 returned with a jobId</text>
           <text class="ts" x="935" y="379" text-anchor="middle">portal polls /jobs/:id every 2 s</text>
 
           <!-- 5. five computed checks (fan out) -->
-          <line class="ln" x1="530" y1="386" x2="530" y2="415"/>
+          <line class="ln" x1="530" y1="386" x2="530" y2="415" />
           <text class="tl" x="540" y="406">computeChecks · deterministic</text>
-          <line class="ln" x1="152" y1="415" x2="948" y2="415"/>
-          <line class="ln" x1="152" y1="415" x2="152" y2="438" marker-end="url(#ah)"/>
-          <line class="ln" x1="351" y1="415" x2="351" y2="438" marker-end="url(#ah)"/>
-          <line class="ln" x1="550" y1="415" x2="550" y2="438" marker-end="url(#ah)"/>
-          <line class="ln" x1="749" y1="415" x2="749" y2="438" marker-end="url(#ah)"/>
-          <line class="ln" x1="948" y1="415" x2="948" y2="438" marker-end="url(#ah)"/>
+          <line class="ln" x1="152" y1="415" x2="948" y2="415" />
+          <line class="ln" x1="152" y1="415" x2="152" y2="438" marker-end="url(#ah)" />
+          <line class="ln" x1="351" y1="415" x2="351" y2="438" marker-end="url(#ah)" />
+          <line class="ln" x1="550" y1="415" x2="550" y2="438" marker-end="url(#ah)" />
+          <line class="ln" x1="749" y1="415" x2="749" y2="438" marker-end="url(#ah)" />
+          <line class="ln" x1="948" y1="415" x2="948" y2="438" marker-end="url(#ah)" />
 
-          <rect class="bx-check" x="60" y="440" width="184" height="72" rx="6"/>
+          <rect class="bx-check" x="60" y="440" width="184" height="72" rx="6" />
           <text class="tt" x="152" y="462" text-anchor="middle">Bloom's verbs</text>
           <text class="ts" x="152" y="481" text-anchor="middle">banned verbs in labels</text>
           <text class="ts" x="152" y="497" text-anchor="middle">and indicators</text>
-          <rect class="bx-check" x="259" y="440" width="184" height="72" rx="6"/>
+          <rect class="bx-check" x="259" y="440" width="184" height="72" rx="6" />
           <text class="tt" x="351" y="462" text-anchor="middle">FRAC structure</text>
           <text class="ts" x="351" y="481" text-anchor="middle">syllabus verbs, B/F mix,</text>
           <text class="ts" x="351" y="497" text-anchor="middle">untyped, thin roles</text>
-          <rect class="bx-check" x="458" y="440" width="184" height="72" rx="6"/>
+          <rect class="bx-check" x="458" y="440" width="184" height="72" rx="6" />
           <text class="tt" x="550" y="462" text-anchor="middle">Level ladder</text>
           <text class="ts" x="550" y="481" text-anchor="middle">fewer than 5 levels,</text>
           <text class="ts" x="550" y="497" text-anchor="middle">repeated L5, repeated label</text>
-          <rect class="bx-check" x="657" y="440" width="184" height="72" rx="6"/>
+          <rect class="bx-check" x="657" y="440" width="184" height="72" rx="6" />
           <text class="tt" x="749" y="462" text-anchor="middle">Coverage &amp; sources</text>
           <text class="ts" x="749" y="481" text-anchor="middle">unmapped, unused,</text>
           <text class="ts" x="749" y="497" text-anchor="middle">undefined refs, postings</text>
-          <rect class="bx-check" x="856" y="440" width="184" height="72" rx="6"/>
+          <rect class="bx-check" x="856" y="440" width="184" height="72" rx="6" />
           <text class="tt" x="948" y="462" text-anchor="middle">Guidelines &amp; context</text>
           <text class="ts" x="948" y="481" text-anchor="middle">outdated laws, programmes</text>
           <text class="ts" x="948" y="497" text-anchor="middle">from config/outdated.json</text>
 
           <!-- fan in -->
-          <line class="ln" x1="152" y1="512" x2="152" y2="535"/>
-          <line class="ln" x1="351" y1="512" x2="351" y2="535"/>
-          <line class="ln" x1="550" y1="512" x2="550" y2="535"/>
-          <line class="ln" x1="749" y1="512" x2="749" y2="535"/>
-          <line class="ln" x1="948" y1="512" x2="948" y2="535"/>
-          <line class="ln" x1="152" y1="535" x2="1000" y2="535"/>
-          <line class="ln" x1="550" y1="535" x2="550" y2="558" marker-end="url(#ah)"/>
+          <line class="ln" x1="152" y1="512" x2="152" y2="535" />
+          <line class="ln" x1="351" y1="512" x2="351" y2="535" />
+          <line class="ln" x1="550" y1="512" x2="550" y2="535" />
+          <line class="ln" x1="749" y1="512" x2="749" y2="535" />
+          <line class="ln" x1="948" y1="512" x2="948" y2="535" />
+          <line class="ln" x1="152" y1="535" x2="1000" y2="535" />
+          <line class="ln" x1="550" y1="535" x2="550" y2="558" marker-end="url(#ah)" />
           <text class="tl" x="560" y="552">findings + stats, "do not recount"</text>
 
           <!-- computed findings also go straight to the merge -->
-          <polyline class="ln" points="1000,535 1000,686 852,686" marker-end="url(#ah)"/>
+          <polyline class="ln" points="1000,535 1000,686 852,686" marker-end="url(#ah)" />
           <text class="tl" x="1008" y="606">computed</text>
           <text class="tl" x="1008" y="620">findings</text>
 
           <!-- 6. agent review -->
-          <rect class="bx-ai" x="250" y="560" width="600" height="60" rx="6"/>
+          <rect class="bx-ai" x="250" y="560" width="600" height="60" rx="6" />
           <text class="tw" x="550" y="583" text-anchor="middle">AI checklist · Vidya (Claude Sonnet 5.5)</text>
-          <text class="ts" x="550" y="603" text-anchor="middle">Q1 scope · Q2 accuracy, 6 competencies a call · Q3 state fit · quote check · unchanged answers reused</text>
+          <text class="ts" x="550" y="603" text-anchor="middle">Q1 scope · Q2 accuracy, 6 competencies a call · Q3 state
+            fit · quote check · unchanged answers reused</text>
 
-          <line class="ln" x1="550" y1="620" x2="550" y2="648" marker-end="url(#ah)"/>
+          <line class="ln" x1="550" y1="620" x2="550" y2="648" marker-end="url(#ah)" />
           <text class="tl" x="560" y="638">quoted flags; verdict and triage computed in code</text>
 
           <!-- 7. merge -->
-          <rect class="bx" x="250" y="650" width="600" height="72" rx="6"/>
+          <rect class="bx" x="250" y="650" width="600" height="72" rx="6" />
           <text class="tt" x="550" y="672" text-anchor="middle">Merge into one report</text>
-          <text class="ts" x="550" y="691" text-anchor="middle">flags without a matching quote, or already covered by a rule, are dropped; at most 3 AI findings</text>
-          <text class="ts" x="550" y="708" text-anchor="middle">sort Blocker → Major → Minor · each tile shows its worst open finding</text>
+          <text class="ts" x="550" y="691" text-anchor="middle">flags without a matching quote, or already covered by a
+            rule, are dropped; at most 3 AI findings</text>
+          <text class="ts" x="550" y="708" text-anchor="middle">sort Blocker → Major → Minor · each tile shows its worst
+            open finding</text>
 
           <!-- 8. save -->
-          <polyline class="ln" points="550,722 550,741 280,741 280,758" marker-end="url(#ah)"/>
-          <polyline class="ln" points="550,741 820,741 820,758" marker-end="url(#ah)"/>
+          <polyline class="ln" points="550,722 550,741 280,741 280,758" marker-end="url(#ah)" />
+          <polyline class="ln" points="550,741 820,741 820,758" marker-end="url(#ah)" />
           <text class="tl" x="290" y="754">upload</text>
           <text class="tl" x="830" y="754">expert check</text>
 
-          <rect class="bx" x="60" y="760" width="440" height="60" rx="6"/>
+          <rect class="bx" x="60" y="760" width="440" height="60" rx="6" />
           <text class="tt" x="280" y="783" text-anchor="middle">Upload review saved</text>
           <text class="ts" x="280" y="802" text-anchor="middle">report + parsed workbook, so it can reopen later</text>
-          <rect class="bx" x="600" y="760" width="440" height="60" rx="6"/>
+          <rect class="bx" x="600" y="760" width="440" height="60" rx="6" />
           <text class="tt" x="820" y="783" text-anchor="middle">Expert check saved</text>
-          <text class="ts" x="820" y="802" text-anchor="middle">on the FRAC · step 6 · version snapshot · review row</text>
+          <text class="ts" x="820" y="802" text-anchor="middle">on the FRAC · step 6 · version snapshot · review
+            row</text>
 
           <!-- 9. outputs -->
-          <line class="ln" x1="280" y1="820" x2="280" y2="845"/>
-          <line class="ln" x1="820" y1="820" x2="820" y2="845"/>
-          <line class="ln" x1="210" y1="845" x2="890" y2="845"/>
-          <line class="ln" x1="210" y1="845" x2="210" y2="863" marker-end="url(#ah)"/>
-          <line class="ln" x1="550" y1="845" x2="550" y2="863" marker-end="url(#ah)"/>
-          <line class="ln" x1="890" y1="845" x2="890" y2="863" marker-end="url(#ah)"/>
+          <line class="ln" x1="280" y1="820" x2="280" y2="845" />
+          <line class="ln" x1="820" y1="820" x2="820" y2="845" />
+          <line class="ln" x1="210" y1="845" x2="890" y2="845" />
+          <line class="ln" x1="210" y1="845" x2="210" y2="863" marker-end="url(#ah)" />
+          <line class="ln" x1="550" y1="845" x2="550" y2="863" marker-end="url(#ah)" />
+          <line class="ln" x1="890" y1="845" x2="890" y2="863" marker-end="url(#ah)" />
           <text class="tl" x="560" y="838">job done → portal loads the report</text>
 
-          <rect class="bx-key" x="60" y="865" width="300" height="56" rx="6"/>
+          <rect class="bx-key" x="60" y="865" width="300" height="56" rx="6" />
           <text class="tt" x="210" y="887" text-anchor="middle">Report on screen</text>
           <text class="ts" x="210" y="906" text-anchor="middle">verdict, triage, 5 tiles, findings</text>
-          <rect class="bx-key" x="400" y="865" width="300" height="56" rx="6"/>
+          <rect class="bx-key" x="400" y="865" width="300" height="56" rx="6" />
           <text class="tt" x="550" y="887" text-anchor="middle">Download Excel</text>
           <text class="ts" x="550" y="906" text-anchor="middle">review sheet or full FRAC workbook</text>
-          <rect class="bx-key" x="740" y="865" width="300" height="56" rx="6"/>
+          <rect class="bx-key" x="740" y="865" width="300" height="56" rx="6" />
           <text class="tt" x="890" y="887" text-anchor="middle">Open in Create FRAC</text>
           <text class="ts" x="890" y="906" text-anchor="middle">uploaded file becomes a FRAC at step 6</text>
         </svg>
       </div>
-      <figcaption>Both entry points converge on the review model, so an expert check and an uploaded review are graded by
+      <figcaption>Both entry points converge on the review model, so an expert check and an uploaded review are graded
+        by
         exactly the same rules. A file without a competency sheet is rejected before any job starts. Computed findings
         reach the report even when the AI review returns nothing, which is how it works today.</figcaption>
     </figure>
@@ -631,18 +1206,26 @@ footer { color: var(--muted); font-size: 13px; }
     <div class="section-head">
       <h3>Every computed check</h3>
       <p>Severity: <span class="sev sev-B">B</span> Blocker, <span class="sev sev-M">M</span> Major,
-        <span class="sev sev-m">m</span> Minor. Checks marked "FRAC sheet" run only when the workbook has one.</p>
+        <span class="sev sev-m">m</span> Minor. Checks marked "FRAC sheet" run only when the workbook has one.
+      </p>
     </div>
     <div class="table-wrap">
       <table class="rules">
         <thead>
-          <tr><th>Check</th><th>Rule</th><th>Severity</th></tr>
+          <tr>
+            <th>Check</th>
+            <th>Rule</th>
+            <th>Severity</th>
+          </tr>
         </thead>
         <tbody>
           <tr>
             <td>Bloom's verbs</td>
-            <td>A level label starts with a non-measurable verb (Understands, Knows, Learns, Is aware of, Appreciates, Is familiar with, Realises, Comprehends). Counted per level; adds "Levels 1 and 2 barely differ" when both are hit.</td>
-            <td><span class="sev sev-M">M</span> if the worst level hits ≥25% of competencies, else <span class="sev sev-m">m</span></td>
+            <td>A level label starts with a non-measurable verb (Understands, Knows, Learns, Is aware of, Appreciates,
+              Is familiar with, Realises, Comprehends). Counted per level; adds "Levels 1 and 2 barely differ" when both
+              are hit.</td>
+            <td><span class="sev sev-M">M</span> if the worst level hits ≥25% of competencies, else <span
+                class="sev sev-m">m</span></td>
           </tr>
           <tr>
             <td></td>
@@ -651,7 +1234,8 @@ footer { color: var(--muted); font-size: 13px; }
           </tr>
           <tr>
             <td>FRAC structure</td>
-            <td>Activities start with a syllabus verb (Describes, Explains, Lists, Defines, States, Discusses…). FRAC sheet.</td>
+            <td>Activities start with a syllabus verb (Describes, Explains, Lists, Defines, States, Discusses…). FRAC
+              sheet.</td>
             <td><span class="sev sev-M">M</span> at ≥30% of activities, else <span class="sev sev-m">m</span></td>
           </tr>
           <tr>
@@ -706,7 +1290,8 @@ footer { color: var(--muted); font-size: 13px; }
           </tr>
           <tr>
             <td>Guidelines &amp; context</td>
-            <td>Repealed laws: Lunacy Act or "lunatic", Mental Health Act 1987, NDPS … 1965. Searched across activities, competencies and every level. One finding per pattern, up to 12 codes listed.</td>
+            <td>Repealed laws: Lunacy Act or "lunatic", Mental Health Act 1987, NDPS … 1965. Searched across activities,
+              competencies and every level. One finding per pattern, up to 12 codes listed.</td>
             <td><span class="sev sev-B">B</span></td>
           </tr>
           <tr>
@@ -716,27 +1301,34 @@ footer { color: var(--muted); font-size: 13px; }
           </tr>
           <tr>
             <td></td>
-            <td>Old programme names: RNTCP, NPCDCS, HWC / Health &amp; Wellness Centre, NVBDCP, MCTS, MTP Act 1971 unless "2021" appears nearby.</td>
+            <td>Old programme names: RNTCP, NPCDCS, HWC / Health &amp; Wellness Centre, NVBDCP, MCTS, MTP Act 1971
+              unless "2021" appears nearby.</td>
             <td><span class="sev sev-m">m</span></td>
           </tr>
           <tr>
             <td>Scope (r3)</td>
-            <td>ANM and ASHA acts beyond the cadre's authorised scope, sentence by sentence (<code>config/review-rules.json</code>). Sentences that rule the act out ("does not … inject", "without … injections") or refer it are not flagged.</td>
+            <td>ANM and ASHA acts beyond the cadre's authorised scope, sentence by sentence
+              (<code>config/review-rules.json</code>). Sentences that rule the act out ("does not … inject", "without …
+              injections") or refer it are not flagged.</td>
             <td><span class="sev sev-B">B</span></td>
           </tr>
           <tr>
             <td>Breadth and KCM (r3)</td>
-            <td>Catch-all, scheme-list or above-the-post labels (too broad); Domain labels that are KCM names ("family / birth planning" excluded); ladders shifted upward.</td>
+            <td>Catch-all, scheme-list or above-the-post labels (too broad); Domain labels that are KCM names ("family /
+              birth planning" excluded); ladders shifted upward.</td>
             <td><span class="sev sev-M">M</span> / <span class="sev sev-m">m</span></td>
           </tr>
           <tr>
             <td>Coverage (r3)</td>
-            <td>Core cadre areas with no dedicated competency; the r3 outdated names (NRT, RMNCH+A, NRHM, VHND, Five Rights, partograph without LCG, device law for frontline).</td>
+            <td>Core cadre areas with no dedicated competency; the r3 outdated names (NRT, RMNCH+A, NRHM, VHND, Five
+              Rights, partograph without LCG, device law for frontline).</td>
             <td><span class="sev sev-M">M</span> / <span class="sev sev-m">m</span></td>
           </tr>
           <tr>
             <td>AI checklist <span class="pill s-done">Claude</span></td>
-            <td>Vidya answers fixed questions per competency: Q1 an act beyond scope, Q2 a wrong drug, dose, law or programme fact, Q3 state fit. Every flag must quote at least 4 words of that competency; at most 3 AI findings, fixed titles.</td>
+            <td>Vidya answers fixed questions per competency: Q1 an act beyond scope, Q2 a wrong drug, dose, law or
+              programme fact, Q3 state fit. Every flag must quote at least 4 words of that competency; at most 3 AI
+              findings, fixed titles.</td>
             <td><span class="sev sev-B">B</span> <span class="sev sev-M">M</span> <span class="sev sev-m">m</span></td>
           </tr>
         </tbody>
@@ -757,30 +1349,40 @@ footer { color: var(--muted); font-size: 13px; }
       <p>One call from the portal to the database, with the state of each hop.</p>
     </div>
     <div class="arch">
-      <div class="arch-cell"><div class="tier">
-        <span class="eyebrow">orgportal</span>
-        <span class="path">/app/home/frac-studio</span>
-        <p>Angular 20 NgModule, v2 design system, FRAC roles.</p>
-        <span class="pill s-done">Committed, pushed</span>
-      </div></div>
-      <div class="arch-cell"><div class="tier">
-        <span class="eyebrow">sunbird-cb-uiproxy</span>
-        <span class="path">/apis/protected/v8/fracStudio/*</span>
-        <p>Session identity as x-aastrika-creator, uploads rebuilt, whitelisted.</p>
-        <span class="pill s-done">Pushed, not deployed</span>
-      </div></div>
-      <div class="arch-cell"><div class="tier">
-        <span class="eyebrow">frac-studio-service</span>
-        <span class="path">/v1/fracs · /v1/frac-reviews · /v1/jobs</span>
-        <p>Review engine r3, AI steps on Claude, jobs with one per FRAC, Excel, cost and review reports.</p>
-        <span class="pill s-done">Pushed, not deployed</span>
-      </div></div>
-      <div class="arch-cell"><div class="tier">
-        <span class="eyebrow">Postgres</span>
-        <span class="path">fracs · frac_versions · reviews · jobs · ai_calls · server_runs · review_answer_cache</span>
-        <p>Migrations 001–009 applied on local Postgres. The shared AI Studio / AskMe instance is not provisioned yet.</p>
-        <span class="pill s-todo">Not provisioned</span>
-      </div></div>
+      <div class="arch-cell">
+        <div class="tier">
+          <span class="eyebrow">orgportal</span>
+          <span class="path">/app/home/frac-studio</span>
+          <p>Angular 20 NgModule, v2 design system, FRAC roles.</p>
+          <span class="pill s-done">Committed, pushed</span>
+        </div>
+      </div>
+      <div class="arch-cell">
+        <div class="tier">
+          <span class="eyebrow">sunbird-cb-uiproxy</span>
+          <span class="path">/apis/protected/v8/fracStudio/*</span>
+          <p>Session identity as x-user-id, uploads rebuilt, whitelisted.</p>
+          <span class="pill s-done">Pushed, not deployed</span>
+        </div>
+      </div>
+      <div class="arch-cell">
+        <div class="tier">
+          <span class="eyebrow">frac-studio-service</span>
+          <span class="path">/v1/fracs · /v1/frac-reviews · /v1/jobs</span>
+          <p>Review engine r3, AI steps on Claude, jobs with one per FRAC, Excel, cost and review reports.</p>
+          <span class="pill s-done">Pushed, not deployed</span>
+        </div>
+      </div>
+      <div class="arch-cell">
+        <div class="tier">
+          <span class="eyebrow">Postgres</span>
+          <span class="path">fracs · frac_versions · reviews · jobs · ai_calls · server_runs ·
+            review_answer_cache</span>
+          <p>Migrations 001–009 applied on local Postgres. The shared AI Studio / AskMe instance is not provisioned yet.
+          </p>
+          <span class="pill s-todo">Not provisioned</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -791,27 +1393,44 @@ footer { color: var(--muted); font-size: 13px; }
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Repo</th><th>Branch</th><th>Commits</th><th>State</th><th>Checks</th></tr>
+          <tr>
+            <th>Repo</th>
+            <th>Branch</th>
+            <th>Commits</th>
+            <th>State</th>
+            <th>Checks</th>
+          </tr>
         </thead>
         <tbody>
           <tr>
-            <td><b>frac-studio-service</b><p>vpPavithra/frac-AIstudio-service</p></td>
+            <td><b>frac-studio-service</b>
+              <p>vpPavithra/frac-AIstudio-service</p>
+            </td>
             <td class="mono">feat/frac-studio-workbook-export</td>
-            <td><span class="mono">127ddc7</span> AI steps, review r3<br><span class="mono">e2c85ee</span> rule fixes<br><span class="mono">1d00638</span> one job per FRAC<br><span class="mono">74fee93</span> spending limit<br>latest <span class="mono">f80b8f6</span><br>review decisions: not committed</td>
+            <td><span class="mono">127ddc7</span> AI steps, review r3<br><span class="mono">e2c85ee</span> rule
+              fixes<br><span class="mono">1d00638</span> one job per FRAC<br><span class="mono">74fee93</span> spending
+              limit<br>latest <span class="mono">f80b8f6</span><br>review decisions: not committed</td>
             <td><span class="pill s-now">Pushed; 11 Nov work local</span></td>
-            <td>184 tests pass (3 need real workbooks or a key), typecheck, lint, config check; HTTP walkthrough 38 of 38</td>
+            <td>184 tests pass (3 need real workbooks or a key), typecheck, lint, config check; HTTP walkthrough 38 of
+              38</td>
           </tr>
           <tr>
-            <td><b>sunbird-cb-uiproxy</b><p>~/SonarRepos/sunbird-cb-uiproxy</p></td>
+            <td><b>sunbird-cb-uiproxy</b>
+              <p>~/SonarRepos/sunbird-cb-uiproxy</p>
+            </td>
             <td class="mono">feat/frac-studio-proxy</td>
             <td><span class="mono">e7bdfc3</span> route<br><span class="mono">6b5ac91</span> whitelist fix</td>
             <td><span class="pill s-done">Pushed, PR not opened</span></td>
             <td>64 tests with AI Studio suite, tsc 0 errors</td>
           </tr>
           <tr>
-            <td><b>sunbird-cb-orgportal</b><p>worktree sunbird-cb-orgportal-frac</p></td>
+            <td><b>sunbird-cb-orgportal</b>
+              <p>worktree sunbird-cb-orgportal-frac</p>
+            </td>
             <td class="mono">feat/frac-studio</td>
-            <td><span class="mono">d830330d</span> UI<br><span class="mono">110c8e94</span> r3 report, AI cost<br><span class="mono">2a5a39e5</span> re-run after fixes<br>latest <span class="mono">e906be0c</span><br>review decisions: not committed</td>
+            <td><span class="mono">d830330d</span> UI<br><span class="mono">110c8e94</span> r3 report, AI cost<br><span
+                class="mono">2a5a39e5</span> re-run after fixes<br>latest <span class="mono">e906be0c</span><br>review
+              decisions: not committed</td>
             <td><span class="pill s-now">Pushed; 11 Nov work local</span></td>
             <td>Full Jest suite (3,581) and production build pass; no FRAC Studio specs yet</td>
           </tr>
@@ -828,18 +1447,24 @@ footer { color: var(--muted); font-size: 13px; }
       <div class="list blockers">
         <h3>Blocked on Sarvesh and the clinical team</h3>
         <ul>
-          <li><code>frac-studio.html</code> <span>exact METHOD and SOURCE_LIBRARY prompts and the Excel method paragraph</span></li>
-          <li>Real workbooks <span>GNM, ANM, Staff Nurse, Meghalaya ANM and Bihar ANM, for the acceptance tests</span></li>
-          <li>Clinical answers <span>ME68 operative flags, ASHA "instead" texts, scope lists for Staff Nurse, GNM and CHO</span></li>
-          <li>Product questions in spec §11 <span>assessment type per level, authorisation source, Hindi sheet, multi-reviewer sign-off</span></li>
+          <li><code>frac-studio.html</code> <span>exact METHOD and SOURCE_LIBRARY prompts and the Excel method
+              paragraph</span></li>
+          <li>Real workbooks <span>GNM, ANM, Staff Nurse, Meghalaya ANM and Bihar ANM, for the acceptance tests</span>
+          </li>
+          <li>Clinical answers <span>ME68 operative flags, ASHA "instead" texts, scope lists for Staff Nurse, GNM and
+              CHO</span></li>
+          <li>Product questions in spec §11 <span>assessment type per level, authorisation source, Hindi sheet,
+              multi-reviewer sign-off</span></li>
         </ul>
       </div>
       <div class="list yours">
         <h3>Waiting on you</h3>
         <ul>
-          <li>Try the review-decision screens <span>brief match card and uploads, the three sheet slots with templates, Preview roles popup, draft Excel download, View source</span></li>
+          <li>Try the review-decision screens <span>brief match card and uploads, the three sheet slots with templates,
+              Preview roles popup, draft Excel download, View source</span></li>
           <li>Approve one paid run per case <span>about $3, to measure the document, sheet and match savings</span></li>
-          <li>Reload during a step <span>the progress panel should come back; a second tab follows the same job</span></li>
+          <li>Reload during a step <span>the progress panel should come back; a second tab follows the same job</span>
+          </li>
           <li>Decide the Fix-button routing <span>label and state findings need a different fix than ladders</span></li>
           <li>Check the Claude rate limit <span>before running all 8 ladder batches at once</span></li>
           <li>Approve the quality comparison <span>about $5: Haiku, lower effort, shorter ladders</span></li>
@@ -849,10 +1474,13 @@ footer { color: var(--muted); font-size: 13px; }
       <div class="list mine">
         <h3>Next for me</h3>
         <ul>
-          <li>Fix-button routing <span>once approved: fixWith per finding, targeted competency rewrite, "Add to state context"</span></li>
+          <li>Fix-button routing <span>once approved: fixWith per finding, targeted competency rewrite, "Add to state
+              context"</span></li>
           <li>Quality comparison <span>claude vs claude-mixed, effort, ladder length, on 2–3 FRACs</span></li>
-          <li>FRAC Studio specs in orgportal <span>Creator page, API service, upload slot, roles preview popup, match card, after your check</span></li>
-          <li>Org-wide position matching <span>needs the proxy to pass the org id; today it matches only your own FRACs, then Positions</span></li>
+          <li>FRAC Studio specs in orgportal <span>Creator page, API service, upload slot, roles preview popup, match
+              card, after your check</span></li>
+          <li>Org-wide position matching <span>needs the proxy to pass the org id; today it matches only your own FRACs,
+              then Positions</span></li>
           <li>Daily report <span>compare with the last day that had activity; fix the flaky workbook test</span></li>
         </ul>
       </div>
@@ -868,22 +1496,106 @@ footer { color: var(--muted); font-size: 13px; }
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Test</th><th>Where</th><th>How</th><th>Status</th></tr>
+          <tr>
+            <th>Test</th>
+            <th>Where</th>
+            <th>How</th>
+            <th>Status</th>
+          </tr>
         </thead>
         <tbody>
-          <tr><td><b>Reviewer flow in the app</b></td><td>orgportal, local</td><td>Upload a workbook, read the report, download it, open it in the Creator</td><td><span class="pill s-done">Done on Claude (ANM Arunachal); Bihar on the mock</span></td></tr>
-          <tr><td><b>Creator flow in the app</b></td><td>orgportal, local</td><td>Brief to Excel on Claude; autosave, history and restore, expert check, fix and re-run; reload during a step</td><td><span class="pill s-now">3 FRACs done; reload check open</span></td></tr>
-          <tr><td><b>Review decisions in the app</b></td><td>orgportal + service, local</td><td>Brief without size, match card (own FRAC, Positions, none), JD upload; Roles, Sources and Competencies sheets and their templates; Preview roles popup; draft Excel before the check; View source; "Agent" and "Position" wording</td><td><span class="pill s-todo">Not run (7 mock tests pass)</span></td></tr>
-          <tr><td><b>View-only user</b></td><td>orgportal, local</td><td>Log in with only <code>frac_read</code>: everything visible, nothing editable</td><td><span class="pill s-todo">Not run</span></td></tr>
-          <tr><td><b>Portal specs and build</b></td><td>orgportal</td><td>Full Jest suite (3,581 tests) and the production build; FRAC Studio specs still to write</td><td><span class="pill s-done">Passing</span></td></tr>
-          <tr><td><b>Service tests</b></td><td>frac-studio-service</td><td>184 unit, API, Postgres-path, mock-flow and provider tests, including the r3 rules, the out-of-date check, one job per FRAC, the spending limit, documents, sheets, templates and position matching; one workbook-reader test is flaky</td><td><span class="pill s-done">Passing</span></td></tr>
-          <tr><td><b>Proxy tests</b></td><td>sunbird-cb-uiproxy</td><td>Routing, identity, uploads, downloads, whitelist (64 with the AI Studio suite)</td><td><span class="pill s-done">Passing</span></td></tr>
-          <tr><td><b>Real Postgres</b></td><td>frac-studio-service</td><td><code>npm run migrate</code> twice against a real database, then the flows with the Postgres store</td><td><span class="pill s-now">Local: migrations 001–009 and every flow; 010 (documents) to apply. Shared instance: not yet</span></td></tr>
-          <tr><td><b>Docker image</b></td><td>frac-studio-service</td><td>Build the image, start it, hit <code>/health</code> and one review</td><td><span class="pill s-todo">Not run</span></td></tr>
-          <tr><td><b>Real fixture workbooks</b></td><td>frac-studio-service</td><td>The spec §6.6 acceptance numbers on the GNM, ANM and Staff Nurse files</td><td><span class="pill s-blocked">Needs files</span></td></tr>
-          <tr><td><b>Full flow on mock data</b></td><td>orgportal + service, local</td><td>Every endpoint over HTTP on the mock: steps, revise, guard, check, fix and re-run, download, history, Reviewer, Open in Creator</td><td><span class="pill s-done">38 of 38 (9 Nov)</span></td></tr>
-          <tr><td><b>Add the AI key</b></td><td>frac-studio-service</td><td>Put the key the profile names (<code>GEMINI_API_KEY</code> for <code>gemini-free</code>, <code>ANTHROPIC_API_KEY</code> for <code>claude</code>) in <code>.env</code> (local) or the deployment secret store (server), never a <code>config/</code> file. Run <code>npm run ai:check</code>, then check the log names the profile. Allow outbound HTTPS to <code>generativelanguage.googleapis.com</code> or <code>api.anthropic.com</code></td><td><span class="pill s-done">Claude key in use; Gemini free key verified</span></td></tr>
-          <tr><td><b>AI-level testing</b></td><td>all</td><td>Each step, revise, retries and invalid-output handling, cost per job (reports in <code>reports/</code>), the real-workbook acceptance tests</td><td><span class="pill s-now">Done on Claude; acceptance tests need the workbooks</span></td></tr>
+          <tr>
+            <td><b>Reviewer flow in the app</b></td>
+            <td>orgportal, local</td>
+            <td>Upload a workbook, read the report, download it, open it in the Creator</td>
+            <td><span class="pill s-done">Done on Claude (ANM Arunachal); Bihar on the mock</span></td>
+          </tr>
+          <tr>
+            <td><b>Creator flow in the app</b></td>
+            <td>orgportal, local</td>
+            <td>Brief to Excel on Claude; autosave, history and restore, expert check, fix and re-run; reload during a
+              step</td>
+            <td><span class="pill s-now">3 FRACs done; reload check open</span></td>
+          </tr>
+          <tr>
+            <td><b>Review decisions in the app</b></td>
+            <td>orgportal + service, local</td>
+            <td>Brief without size, match card (own FRAC, Positions, none), JD upload; Roles, Sources and Competencies
+              sheets and their templates; Preview roles popup; draft Excel before the check; View source; "Agent" and
+              "Position" wording</td>
+            <td><span class="pill s-todo">Not run (7 mock tests pass)</span></td>
+          </tr>
+          <tr>
+            <td><b>FRAC Studio role</b></td>
+            <td>orgportal + uiproxy, local</td>
+            <td>Log in with only <code>FRAC_AI_CREATOR</code>: the menu, page and API work; a user without it gets no
+              menu, the route refuses and the proxy answers 403</td>
+            <td><span class="pill s-todo">Not run</span></td>
+          </tr>
+          <tr>
+            <td><b>Portal specs and build</b></td>
+            <td>orgportal</td>
+            <td>Full Jest suite (3,581 tests) and the production build; FRAC Studio specs still to write</td>
+            <td><span class="pill s-done">Passing</span></td>
+          </tr>
+          <tr>
+            <td><b>Service tests</b></td>
+            <td>frac-studio-service</td>
+            <td>184 unit, API, Postgres-path, mock-flow and provider tests, including the r3 rules, the out-of-date
+              check, one job per FRAC, the spending limit, documents, sheets, templates and position matching; one
+              workbook-reader test is flaky</td>
+            <td><span class="pill s-done">Passing</span></td>
+          </tr>
+          <tr>
+            <td><b>Proxy tests</b></td>
+            <td>sunbird-cb-uiproxy</td>
+            <td>Routing, identity, uploads, downloads, whitelist (64 with the AI Studio suite)</td>
+            <td><span class="pill s-done">Passing</span></td>
+          </tr>
+          <tr>
+            <td><b>Real Postgres</b></td>
+            <td>frac-studio-service</td>
+            <td><code>npm run migrate</code> twice against a real database, then the flows with the Postgres store</td>
+            <td><span class="pill s-now">Local: migrations 001–009 and every flow; 010 (documents) to apply. Shared
+                instance: not yet</span></td>
+          </tr>
+          <tr>
+            <td><b>Docker image</b></td>
+            <td>frac-studio-service</td>
+            <td>Build the image, start it, hit <code>/health</code> and one review</td>
+            <td><span class="pill s-todo">Not run</span></td>
+          </tr>
+          <tr>
+            <td><b>Real fixture workbooks</b></td>
+            <td>frac-studio-service</td>
+            <td>The spec §6.6 acceptance numbers on the GNM, ANM and Staff Nurse files</td>
+            <td><span class="pill s-blocked">Needs files</span></td>
+          </tr>
+          <tr>
+            <td><b>Full flow on mock data</b></td>
+            <td>orgportal + service, local</td>
+            <td>Every endpoint over HTTP on the mock: steps, revise, guard, check, fix and re-run, download, history,
+              Reviewer, Open in Creator</td>
+            <td><span class="pill s-done">38 of 38 (9 Nov)</span></td>
+          </tr>
+          <tr>
+            <td><b>Add the AI key</b></td>
+            <td>frac-studio-service</td>
+            <td>Put the key the profile names (<code>GEMINI_API_KEY</code> for <code>gemini-free</code>,
+              <code>ANTHROPIC_API_KEY</code> for <code>claude</code>) in <code>.env</code> (local) or the deployment
+              secret store (server), never a <code>config/</code> file. Run <code>npm run ai:check</code>, then check
+              the log names the profile. Allow outbound HTTPS to <code>generativelanguage.googleapis.com</code> or
+              <code>api.anthropic.com</code>
+            </td>
+            <td><span class="pill s-done">Claude key in use; Gemini free key verified</span></td>
+          </tr>
+          <tr>
+            <td><b>AI-level testing</b></td>
+            <td>all</td>
+            <td>Each step, revise, retries and invalid-output handling, cost per job (reports in <code>reports/</code>),
+              the real-workbook acceptance tests</td>
+            <td><span class="pill s-now">Done on Claude; acceptance tests need the workbooks</span></td>
+          </tr>
         </tbody>
       </table>
     </div>

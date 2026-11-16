@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common'
 import { NgModule } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
-import { FEATURE_KEY } from '../../shared/access/feature-access'
 import { DisableForViewOnlyDirective } from '../../shared/directives/disable-for-view-only.directive'
 import { HideForViewOnlyDirective } from '../../shared/directives/hide-for-view-only.directive'
 import { CompetencyEditorComponent } from './components/competency-editor/competency-editor.component'
@@ -58,9 +57,6 @@ import { ReviewerComponent } from './pages/reviewer/reviewer.component'
     HideForViewOnlyDirective,
     DisableForViewOnlyDirective,
   ],
-  providers: [
-    // Shares FRAC's roles: frac_read users see everything, mutations are hidden
-    { provide: FEATURE_KEY, useValue: 'frac' },
-  ],
+  // No FEATURE_KEY: FRAC Studio has one role, FRAC_AI_CREATOR, which may do everything, so nothing is view-only
 })
 export class FracStudioModule { }

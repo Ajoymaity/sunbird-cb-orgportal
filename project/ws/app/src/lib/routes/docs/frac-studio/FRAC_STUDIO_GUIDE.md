@@ -264,10 +264,9 @@ Calls retry up to 3 times on network and rate-limit errors, with a 10-minute tim
 
 | Role | Can |
 | --- | --- |
-| `frac_admin` | Everything: create, run steps, edit, check, review, download |
-| `frac_read` | See everything and download; every button that changes a FRAC is hidden |
+| `frac_ai_creator` | Everything in FRAC Studio: create, run steps, edit, check, review, download |
 
-Both roles are in the portal's bootstrap role list, so a user with only one of them is not logged out.
+FRAC Studio has its own role (16 Nov 2026), separate from the FRAC module's `frac_admin` / `frac_read`. The menu (`requiredRoles: ["frac_ai_creator"]`), the route guard and the uiproxy (`ROLE_CHECK: [FRAC_AI_CREATOR]`) all require it. `FRAC_AI_CREATOR` is in the portal's bootstrap role list, so a user holding only this role is not logged out; DevOps must add it to `window.env.portalRoles` and to the host-served `home.json`.
 
 ## Conditions verified
 
@@ -318,7 +317,7 @@ One service, two ways to run it: the sample-data mock or Claude. Run every comma
 
     1. Start it with `npm run dev:ai` (or `start:ai`). These set `AI_REQUIRE_REAL=true`, so the service refuses to start on the mock and says why. `npm run dev` does not: it follows whatever `AI_PROVIDER` says.
     2. The startup log names the provider: `"ai":"claude"` (or the profile in use), never `"ai":"mock"`.
-    3. `curl -H 'x-aastrika-creator: me' localhost:3010/v1/info` returns `{"aiProvider":"claude"}`.
+    3. `curl -H 'x-user-id: me' localhost:3010/v1/info` returns `{"aiProvider":"claude"}`.
     4. After a step, `npm run ai:report -- --days 1` lists the calls under `claude · claude-sonnet-5-5`; mock calls show as `mock · mock`.
 
     The cost in the portal reads "est." on the mock (no bill), so check one of the above to be sure.
