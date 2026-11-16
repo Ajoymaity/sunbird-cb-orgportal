@@ -1,0 +1,68 @@
+<section class="report" *ngIf="report">
+  <header class="report-head">
+    <div class="report-title-row">
+      <h2 class="report-title">{{ report.title }}</h2>
+      <span class="triage" [ngClass]="'triage-' + report.triage">{{ triageLabel }}</span>
+    </div>
+    <p class="verdict">{{ report.verdict }}</p>
+    <p class="summary" *ngIf="report.summary">{{ report.summary }}</p>
+    <p class="provenance" *ngIf="report.findings.length">{{ provenance }}</p>
+    <div class="meta" *ngIf="report.cadre || report.state">
+      <span *ngIf="report.cadre">Position: {{ report.cadre }}</span>
+      <span *ngIf="report.state">State: {{ report.state }}</span>
+    </div>
+    <dl class="stats">
+      <div class="stat" *ngFor="let s of statItems">
+        <dt>{{ s.label }}</dt>
+        <dd>{{ s.value }}</dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="checks">
+    <div class="check" *ngFor="let c of report.checks" [ngClass]="'check-' + c.cls">
+      <span class="check-name">{{ c.name }}</span>
+      <span class="check-status">{{ c.status }}</span>
+      <span class="check-count">{{ c.n }} finding{{ c.n === 1 ? '' : 's' }}</span>
+    </div>
+  </div>
+
+  <div class="findings">
+    <h3 class="section-title">Findings</h3>
+    <p class="empty" *ngIf="!report.findings.length">No findings.</p>
+    <div class="fix-all" *ngIf="fixableOpen.length || handOpen">
+      <button type="button" class="fix-all-btn" *ngIf="fixableOpen.length" [disabled]="!canFix" (click)="fixAll.emit(fixableOpen)">
+        Fix all findings</button>
+      <span class="fix-all-note">
+        <ng-container *ngIf="fixableOpen.length">The agent rewrites the affected competency ladders in one run ({{ fixAllCost }}),
+          then re-run the expert check.</ng-container>
+        <ng-container *ngIf="handOpen">{{ handOpen }} {{ handOpen === 1 ? 'finding needs' : 'findings need' }} a fix by hand on its
+          tab.</ng-container>
+      </span>
+    </div>
+    <article class="finding" *ngFor="let f of report.findings; trackBy: trackByIndex" [class.fixed]="f.fixed">
+      <div class="finding-head">
+        <span class="sev" [ngClass]="'sev-' + f.sev">{{ severityLabels[f.sev] }}</span>
+        <h4 class="finding-title">{{ f.title }}</h4>
+        <span class="fixed-tag" *ngIf="f.fixed">Fixed</span>
+      </div>
+      <p class="finding-detail">{{ f.detail }}</p>
+      <p class="finding-refs" *ngIf="f.refs.length"><strong>Refs:</strong> {{ f.refs.join(', ') }}</p>
+      <p class="finding-fix" *ngIf="f.fix"><strong>Suggested fix:</strong> {{ f.fix }}</p>
+      <p class="finding-by">{{ foundBy(f) }}</p>
+      <button type="button" class="fix-btn" *ngIf="fixable(f)" [disabled]="!canFix" (click)="fixFinding.emit(f)">
+        Fix these competencies
+      </button>
+      <button type="button" class="fix-btn" *ngIf="replaceable(f)" [disabled]="!canFix" (click)="replaceOutdated.emit(f)">
+        {{ replaceLabel(f) }}
+      </button>
+    </article>
+  </div>
+
+  <div class="strengths" *ngIf="report.strengths.length">
+    <h3 class="section-title">Strengths</h3>
+    <ul>
+      <li *ngFor="let s of report.strengths">{{ s }}</li>
+    </ul>
+  </div>
+</section>

@@ -1,0 +1,90 @@
+<div class="layout">
+<form class="brief" (ngSubmit)="create()">
+  <section class="step-card">
+    <div class="step-head">
+      <span class="step-num">1</span>
+      <h2 class="step-title">Brief</h2>
+      <span class="step-tag required">Required</span>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label for="fs-cadre">Position *</label>
+        <input id="fs-cadre" name="cadre" type="text" [(ngModel)]="cadre" (ngModelChange)="lookUp()"
+          placeholder="e.g. ANM, GNM, ASHA, Staff Nurse" required autocomplete="off" />
+      </div>
+      <div class="select-field">
+        <span class="select-label">State</span>
+        <select name="state" [(ngModel)]="state" (ngModelChange)="lookUp()" aria-label="State">
+          <option *ngFor="let s of states" [value]="s">{{ s }}</option>
+        </select>
+        <span class="select-arrow" aria-hidden="true">▾</span>
+      </div>
+    </div>
+
+    <!-- Position matching: exact name, the owner's FRACs first, then the Positions master -->
+    <div class="match" role="status" aria-live="polite" *ngIf="cadre.trim()">
+      <span class="match-checking" *ngIf="matching">Checking for an existing position named "{{ cadre.trim() }}"…</span>
+      <ng-container *ngIf="!matching && match as m">
+        <ng-container *ngIf="m.kind === 'frac'">
+          <div class="match-card stacked">
+            <p class="match-text">
+              <strong>Found {{ m.match.cadre }}</strong> in your FRACs ({{ m.match.state }} ·
+              {{ m.match.counts.roles }} roles · {{ m.match.counts.activities }} activities<ng-container
+                *ngIf="m.match.postings.length"> · postings: {{ m.match.postings.join(', ') }}</ng-container>).
+            </p>
+            <label class="match-option" *ngIf="m.match.postings.length">
+              <input type="checkbox" name="usePostings" [(ngModel)]="usePostings" /> Start from its postings
+            </label>
+            <label class="match-option">
+              <input type="checkbox" name="useRoles" [(ngModel)]="useRoles" /> Also copy its roles and activities
+              <span class="match-note">(they skip the roles step unless you attach a job description)</span>
+            </label>
+            <ng-container *ngTemplateOutlet="syllabusWarning"></ng-container>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="m.kind === 'positions'">
+          <div class="match-card stacked" *ngIf="m.position.roles.length; else noRoles">
+            <p class="match-text">
+              <strong>Found {{ m.position.name }}</strong> in Positions ({{ m.position.code }} ·
+              {{ m.position.roles.length }} roles mapped).
+            </p>
+            <label class="match-option">
+              <input type="checkbox" name="useRoles" [(ngModel)]="useRoles" /> Start from its roles and activities
+            </label>
+            <ng-container *ngTemplateOutlet="syllabusWarning"></ng-container>
+          </div>
+          <ng-template #noRoles>
+            <p class="match-new">{{ m.position.name }} is in Positions but has no roles mapped yet, so it starts as a new
+              FRAC.</p>
+          </ng-template>
+        </ng-container>
+        <ng-template #syllabusWarning>
+          <p class="match-warn" *ngIf="syllabus.length" role="alert">
+            {{ syllabus.length }} of these roles read as syllabus subjects ({{ syllabus.slice(0, 4).join(', ') }}{{
+            syllabus.length > 4 ? '…' : '' }}), not areas of work. Copying them is not recommended: build the roles from
+            the job instead.
+          </p>
+        </ng-template>
+        <p class="match-new" *ngIf="m.kind === 'none'">No position named "{{ m.name }}" yet. A new position will be
+          created with this FRAC.</p>
+      </ng-container>
+    </div>
+
+    <div class="field">
+      <label for="fs-prompt">What should this FRAC cover?</label>
+      <textarea id="fs-prompt" name="prompt" [(ngModel)]="prompt"
+        placeholder="Postings, programmes, anything the team already knows about the job"></textarea>
+    </div>
+
+    <p class="hint">The agent chooses the FRAC's size from the research. After you create the FRAC, attach a job description,
+      sources sheet or competency sheet on its Research tab.</p>
+  </section>
+
+  <div class="error" *ngIf="error" role="alert">{{ error }}</div>
+  <div class="actions" *appHideForViewOnly>
+    <button type="submit" class="btn-primary" [disabled]="!canCreate">{{ saving ? 'Creating…' : 'Create FRAC' }}</button>
+  </div>
+</form>
+<ws-app-frac-progress class="steps" [steps]="steps"></ws-app-frac-progress>
+</div>

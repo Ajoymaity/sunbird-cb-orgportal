@@ -1,0 +1,379 @@
+@import '../../frac-studio-common';
+
+.detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: $v2-space-3;
+  align-items: start;
+
+  @media (max-width: 1180px) { grid-template-columns: 1fr; }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $v2-space-2;
+  min-width: 0;
+}
+
+.brief-card {
+  @include v2-action-card;
+  display: flex;
+  flex-direction: column;
+  gap: $v2-space-1;
+}
+
+.brief-card { position: relative; }
+
+.brief-head {
+  position: absolute;
+  top: $v2-space-2;
+  right: $v2-space-2;
+}
+
+.btn-secondary.small { height: 32px; padding: 0 14px; font-size: $v2-font-caption; }
+
+.brief-position { flex-basis: 100%; padding-right: 120px; }
+
+.brief-form {
+  gap: $v2-space-2;
+
+  label { @include v2-form-label; }
+  input, select { @include v2-input-field; width: 100%; }
+  textarea { @include v2-input-field; width: 100%; height: auto; padding-block: 8px; resize: vertical; }
+
+  .field { display: flex; flex-direction: column; }
+  .actions { justify-content: flex-start; }
+  .btn-primary { width: auto; min-width: 160px; }
+}
+
+.brief-fields {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: $v2-space-2;
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.brief {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $v2-space-3;
+  margin: 0;
+
+  dt {
+    font-size: $v2-font-micro;
+    color: $v2-color-text-secondary;
+  }
+
+  dd { margin: 0; font-weight: 500; }
+}
+
+.prompt,
+.hint {
+  margin: 0;
+  color: $v2-color-text-secondary;
+  font-size: $v2-font-caption;
+}
+
+.dirty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px $v2-space-2;
+  border-radius: $v2-radius-input;
+  background: $v2-status-warning-bg;
+  color: $v2-status-warning-text;
+  font-size: $v2-font-label;
+}
+
+// Section tabs inside the page (underline style, distinct from the shell's pill tabs)
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid $v2-color-border;
+}
+
+.tab {
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: $v2-color-text-secondary;
+  font-family: $v2-font-family;
+  font-size: $v2-font-caption;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: -1px;
+
+  &:hover { color: $v2-color-primary; }
+
+  &.active {
+    color: $v2-color-primary;
+    border-bottom-color: $v2-color-primary;
+  }
+
+  &:focus-visible { outline: 2px solid $v2-color-primary; outline-offset: 2px; }
+}
+
+.panel { min-width: 0; }
+
+.dirty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $v2-space-2;
+}
+
+.stale-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: $v2-space-2;
+  border-right: 1px solid currentColor;
+
+  &:last-child { padding-right: 0; border-right: 0; }
+
+  .text-btn:first-child { font-weight: 600; }
+}
+
+.text-btn:disabled { opacity: 0.5; cursor: default; text-decoration: none; }
+
+// Revise with feedback, above the open step's editor
+.revise {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: $v2-space-2;
+  border: 1px solid $v2-color-border;
+  border-radius: $v2-radius-card;
+  background: $v2-color-primary-tint;
+}
+
+.revise-label { @include v2-form-label; margin: 0; }
+
+.revise-input {
+  @include v2-input-field;
+  height: auto;
+  min-height: 56px;
+  padding: 8px 12px;
+  resize: vertical;
+  background: #ffffff;
+}
+
+.check {
+  display: flex;
+  flex-direction: column;
+  gap: $v2-space-2;
+}
+
+.start-research {
+  @include v2-empty-state-card;
+  align-items: flex-start;
+  text-align: left;
+  gap: $v2-space-2;
+}
+
+.confirm-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px $v2-space-2;
+  border-radius: $v2-radius-input;
+  background: $v2-status-warning-bg;
+  color: $v2-status-warning-text;
+  font-size: $v2-font-label;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+// The primary action, under the tab content
+// Messages on the left (they wrap), buttons on the right in a fixed order and the same width, so nothing jumps when
+// a job starts or the next step changes. On narrow screens the buttons drop under the messages as one row.
+.next-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px $v2-space-2;
+  padding-top: $v2-space-2;
+  border-top: 1px solid $v2-color-border;
+}
+
+.next-step-msgs {
+  flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.next-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+
+  .btn-primary,
+  .btn-secondary { width: auto; min-width: 240px; }
+}
+
+.next-step-msg {
+  color: $v2-color-text-secondary;
+  font-size: $v2-font-caption;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-title {
+  @include v2-section-title;
+  margin: 0;
+}
+
+.text-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: $v2-color-primary;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover { text-decoration: underline; }
+}
+
+.btn-primary { @include v2-btn-primary; width: 100%; }
+.btn-secondary { @include v2-btn-secondary; }
+.error { @include fs-error; margin-bottom: $v2-space-2; }
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shimmer {
+  @include v2-shimmer;
+  height: 120px;
+
+  &.short { height: 48px; width: 60%; }
+}
+
+// Upload slots under the Research editor (brief documents, sources sheet)
+.uploads {
+  display: flex;
+  flex-direction: column;
+  gap: $v2-space-2;
+  margin-bottom: $v2-space-2; // above the research, so documents are attached before it runs
+}
+
+ws-app-frac-document-upload {
+  display: block;
+  margin-bottom: $v2-space-2;
+}
+
+.uploads ws-app-frac-document-upload { margin-bottom: 0; }
+
+// "Preview roles" on the Level ladders tab, and its popup (native <dialog>, shown in the top layer)
+.preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: $v2-space-2;
+}
+
+.preview-dialog {
+  width: min(960px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 0;
+  border: 0;
+  border-radius: $v2-radius-card-large;
+  box-shadow: $v2-shadow-dropdown;
+
+  &::backdrop { background: rgba(0, 0, 0, 0.4); }
+}
+
+.preview-dialog-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: $v2-space-2 $v2-space-3;
+  background: #ffffff;
+  border-bottom: 1px solid $v2-color-border;
+
+  h2 {
+    @include v2-modal-title;
+    margin: 0;
+    font-size: 22px;
+  }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid $v2-color-border;
+    border-radius: 50%;
+    background: #ffffff;
+    color: $v2-color-text-secondary;
+    font-size: 18px;
+    cursor: pointer;
+
+    &:hover { border-color: $v2-color-primary; color: $v2-color-primary; }
+  }
+}
+
+.preview-dialog ws-app-frac-roles-preview {
+  display: block;
+  padding: $v2-space-2 $v2-space-3 $v2-space-3;
+}
+
+.comp-source { margin: 0 0 $v2-space-2; }
+
+.sheet-note {
+  color: $v2-color-text-secondary;
+  font-size: $v2-font-label;
+}
+
+// Roles copied from a matched position, on the Roles tab: where they came from, and a way to clear them
+.copied-roles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: $v2-space-2;
+  padding: 12px $v2-space-2;
+  border: 1px solid $v2-status-warning-text;
+  border-radius: $v2-radius-input;
+  background: $v2-status-warning-bg;
+  font-size: $v2-font-caption;
+
+  p { margin: 0; color: $v2-color-text; }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .danger { @include v2-btn-danger; height: 32px; padding: 0 14px; font-size: $v2-font-caption; }
+}

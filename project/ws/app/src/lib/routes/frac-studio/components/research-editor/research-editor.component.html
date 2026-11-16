@@ -1,0 +1,127 @@
+<div class="research">
+  <div class="origin" *ngIf="research.origin as origin">
+    <span *ngIf="origin.documents.length"><b>From your documents:</b> {{ fieldList(origin.documents) }}</span>
+    <span *ngIf="origin.agent.length"><b>Researched by the agent:</b> {{ fieldList(origin.agent) }}</span>
+    <span *ngIf="!origin.agent.length">Your documents covered everything, so the agent did not search.</span>
+  </div>
+
+  <section class="block">
+    <label class="block-title" for="fs-research-summary">Job summary</label>
+    <textarea id="fs-research-summary" #summary rows="5" [value]="research.summary"
+      placeholder="What the job is, where the position is based, who they report to (6–10 sentences)"
+      (input)="setText('summary', summary.value)" appDisableForViewOnly></textarea>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <h3 class="block-title">Postings</h3>
+      <span class="hint">Taken from your brief and documents, never guessed. Each becomes a Yes/No column in Roles &amp;
+        activities. As many as the job has: one, several, or none if it has no separate postings.</span>
+    </div>
+    <p class="empty" *ngIf="!postings.length">No postings: the brief and documents name none. Add where the position works
+      if it has separate postings, e.g. "ANM at Sub-Centre (outreach)", or leave this empty.</p>
+    <div class="posting" *ngFor="let p of postings; let i = index; trackBy: trackByIndex">
+      <span class="code">{{ p.key }}</span>
+      <input #postingLabel type="text" [value]="p.label" placeholder="e.g. ANM at delivery-point PHC"
+        [attr.aria-label]="'Label of posting ' + p.key" (input)="setPostingLabel(i, postingLabel.value)" appDisableForViewOnly />
+    </div>
+    <div class="posting-actions" *appHideForViewOnly>
+      <button type="button" class="text-btn" (click)="addPosting()" [disabled]="postings.length >= maxPostings">+ Add posting</button>
+      <ng-container *ngIf="lastPosting">
+        <button *ngIf="!confirmRemovePosting" type="button" class="text-btn danger" (click)="confirmRemovePosting = true">
+          Remove {{ lastPosting.key }}
+        </button>
+        <span *ngIf="confirmRemovePosting" class="confirm">
+          Remove {{ lastPosting.key }} and its Yes/No column from every activity?
+          <button type="button" class="text-btn danger" (click)="removeLastPosting()">Remove</button>
+          <button type="button" class="text-btn" (click)="confirmRemovePosting = false">Cancel</button>
+        </span>
+      </ng-container>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="block" *ngFor="let l of lists">
+      <label class="block-title" [for]="'fs-research-' + l.key">{{ l.label }}</label>
+      <textarea [id]="'fs-research-' + l.key" #listField rows="5" [value]="research[l.key]" [placeholder]="l.hint"
+        (input)="setText(l.key, listField.value)" appDisableForViewOnly></textarea>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <h3 class="block-title">Sources</h3>
+      <span class="hint">Job descriptions, programme guidelines and facility standards. View opens the page or document research
+        used; links are checked before they are kept. Never invent page or circular numbers; write "verify" when unsure.</span>
+    </div>
+    <p class="empty" *ngIf="!research.sources.length">No sources yet.</p>
+    <div class="table-wrap" *ngIf="research.sources.length">
+      <table>
+        <thead>
+          <tr>
+            <th wsFracSort="title" [sortWith]="sourceSort">Title</th>
+            <th class="col-issuer" wsFracSort="issuer" [sortWith]="sourceSort">Issuer</th>
+            <th class="col-year" wsFracSort="year" [sortWith]="sourceSort">Year</th>
+            <th wsFracSort="use" [sortWith]="sourceSort">Use</th>
+            <th class="col-tier" wsFracSort="tier" [sortWith]="sourceSort">Tier</th>
+            <th class="col-link" wsFracSort="url" [sortWith]="sourceSort" title="Sources with a link first">View</th>
+            <th class="col-del"><span class="sr-only">Delete</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of sourceSort.rows(research.sources); trackBy: trackByRow">
+            <td>
+              <input #title type="text" [value]="row.item.title" aria-label="Source title"
+                (input)="setSource(row.index, { title: title.value })" appDisableForViewOnly />
+            </td>
+            <td class="col-issuer">
+              <input #issuer type="text" [value]="row.item.issuer" aria-label="Issuer"
+                (input)="setSource(row.index, { issuer: issuer.value })" appDisableForViewOnly />
+            </td>
+            <td class="col-year">
+              <input #year type="text" [value]="row.item.year" aria-label="Year"
+                (input)="setSource(row.index, { year: year.value })" appDisableForViewOnly />
+            </td>
+            <td>
+              <input #use type="text" [value]="row.item.use" aria-label="What it is used for"
+                (input)="setSource(row.index, { use: use.value })" appDisableForViewOnly />
+            </td>
+            <td class="col-tier">
+              <input #tier type="text" [value]="row.item.tier" aria-label="Tier" placeholder="JD, Programme guideline…"
+                (input)="setSource(row.index, { tier: tier.value })" appDisableForViewOnly />
+            </td>
+            <td class="col-link">
+              <a class="open-source" *ngIf="isWebLink(row.item.url); else noLink" [href]="row.item.url" target="_blank" rel="noopener noreferrer"
+                title="View source" [attr.aria-label]="'View source: ' + (row.item.title || 'untitled') + ' (opens in a new tab)'">
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <path fill="currentColor" d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" />
+                </svg>
+              </a>
+              <ng-template #noLink>
+                <span class="open-source none" tabindex="0" [attr.aria-describedby]="'no-link-' + row.index"
+                  aria-label="View source unavailable">
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                    <path fill="currentColor" d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" />
+                  </svg>
+                  <span class="no-link-tip" role="tooltip" [id]="'no-link-' + row.index">{{ noLinkReason(row.item) }}</span>
+                </span>
+              </ng-template>
+            </td>
+            <td class="col-del">
+              <button type="button" class="icon-btn" (click)="removeSource(row.index)"
+                [attr.aria-label]="'Delete source ' + (row.index + 1)" *appHideForViewOnly>×</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button type="button" class="text-btn" (click)="addSource()" *appHideForViewOnly>+ Add source</button>
+  </section>
+
+  <section class="block">
+    <label class="block-title" for="fs-research-notes">Source notes</label>
+    <textarea id="fs-research-notes" #notes rows="3" [value]="research.sourceNotes"
+      placeholder="Anything about the sources a reviewer should know" (input)="setText('sourceNotes', notes.value)"
+      appDisableForViewOnly></textarea>
+  </section>
+</div>

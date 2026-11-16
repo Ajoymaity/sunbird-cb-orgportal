@@ -1,0 +1,100 @@
+import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { FRAC_STUDIO_MAX_POSTINGS, FRAC_STUDIO_RESEARCH_FIELD_LABELS, FRAC_STUDIO_RESEARCH_LISTS } from '../../constants/frac-studio.constants'
+import { FracPosting, FracResearch, FracRole, FracSource, ResearchField } from '../../models/frac-studio.models'
+import {
+  addPosting,
+  addSource,
+  removeLastPosting,
+  removeSource,
+  updatePosting,
+  updateSource,
+} from '../../utils/frac-studio-edit.util'
+import { SortedRow, TableSort } from '../../utils/frac-studio-sort.util'
+
+/**
+ * Job research editor (spec 5.2), filled in by hand until the AI research step exists.
+ * Postings live on the FRAC beside research; removing one also clears its column from the
+ * activities, so that change emits both postings and roles.
+ */
+@Component({
+  selector: 'ws-app-frac-research-editor',
+  templateUrl: './research-editor.component.html',
+  styleUrls: ['./research-editor.component.scss'],
+  standalone: false,
+})
+export class ResearchEditorComponent {
+  @Input() research!: FracResearch
+  @Input() postings: FracPosting[] = []
+  @Input() roles: FracRole[] = []
+  @Output() readonly researchChange = new EventEmitter<FracResearch>()
+  @Output() readonly postingsChange = new EventEmitter<{ postings: FracPosting[], roles?: FracRole[] }>()
+
+  readonly lists = FRAC_STUDIO_RESEARCH_LISTS
+  readonly maxPostings = FRAC_STUDIO_MAX_POSTINGS
+  confirmRemovePosting = false
+  /** View sorts by the link itself, so sources with no link gather at the end. */
+  readonly sourceSort = new TableSort<FracSource>((source, key) => source[key as keyof FracSource])
+
+  /** "job summary, postings and sources" for the line saying where research found each part. */
+  fieldList(fields: ResearchField[]): string {
+    const names = fields.map(f => FRAC_STUDIO_RESEARCH_FIELD_LABELS[f] ?? f)
+    return names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names.join('')
+  }
+
+  setText(key: keyof Omit<FracResearch, 'sources'>, value: string): void {
+    this.researchChange.emit({ ...this.research, [key]: value })
+  }
+
+  setPostingLabel(index: number, label: string): void {
+    this.postingsChange.emit({ postings: updatePosting(this.postings, index, label) })
+  }
+
+  addPosting(): void {
+    this.postingsChange.emit({ postings: addPosting(this.postings) })
+  }
+
+  /** Removes the last posting and its Yes/No values from every activity. */
+  removeLastPosting(): void {
+    this.confirmRemovePosting = false
+    this.postingsChange.emit(removeLastPosting(this.postings, this.roles))
+  }
+
+  get lastPosting(): FracPosting | undefined {
+    return this.postings[this.postings.length - 1]
+  }
+
+  addSource(): void {
+    this.researchChange.emit(addSource(this.research))
+  }
+
+  /** Only web addresses are opened, never other URL schemes typed into the field. */
+  /**
+   * Why a source has no View link, for the tooltip on the greyed-out icon: a source without one is compiled from
+   * several documents (validated with the team, 13 Nov 2026), except the job description the team uploaded.
+   */
+  noLinkReason(source: FracSource): string {
+    return (source.issuer || '').trim().toLowerCase() === 'team document'
+      ? 'This is your uploaded document, so there is no web page to open.'
+      : 'This source is drawn from several documents, so there is no single link to view.'
+  }
+
+  isWebLink(url: string | undefined): boolean {
+    return /^https?:\/\/\S+$/i.test((url || '').trim())
+  }
+
+  setSource(index: number, patch: Partial<FracSource>): void {
+    this.researchChange.emit(updateSource(this.research, index, patch))
+  }
+
+  removeSource(index: number): void {
+    this.researchChange.emit(removeSource(this.research, index))
+  }
+
+  trackByIndex(index: number): number {
+    return index
+  }
+
+  trackByRow(_index: number, row: SortedRow<FracSource>): number {
+    return row.index
+  }
+}

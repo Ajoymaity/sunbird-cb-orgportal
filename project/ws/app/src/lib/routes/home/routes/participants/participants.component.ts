@@ -15,6 +15,7 @@ import * as XLSX from 'xlsx'
 export class ParticipantsComponent implements OnInit, OnDestroy {
   searchQuery = ''
   filterStatus = ''
+  filterEmailStatus = ''
   showFilterPanel = false
   participants: any[] = []
   isLoading = true
@@ -65,6 +66,8 @@ export class ParticipantsComponent implements OnInit, OnDestroy {
           userId: participant.userId || '',
           isNonQr: participant.userId === 'Non-QR-User',
           certificateStatus: participant.certificateGenerationStatus || null,
+          email: participant.email || '',
+          emailSentAt: participant.emailSentAt || null,
         }))
         this.isLoading = false
       },
@@ -98,16 +101,33 @@ export class ParticipantsComponent implements OnInit, OnDestroy {
     this.filterStatus = this.filterStatus === status ? '' : status
   }
 
+  setEmailFilter(status: string): void {
+    this.filterEmailStatus = this.filterEmailStatus === status ? '' : status
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(this.filterStatus || this.filterEmailStatus)
+  }
+
+  // Single source for the Email Status column, its badge and the filter, so they never disagree.
+  // 'notsent' = certificate generated but no email went out (send failed, or emails were off).
+  emailStatus(participant: any): 'none' | 'sent' | 'notsent' | 'pending' {
+    if (!participant.email) { return 'none' }
+    if (participant.emailSentAt) { return 'sent' }
+    return participant.certificateStatus === 'success' ? 'notsent' : 'pending'
+  }
+
   clearFilters(): void {
     this.searchQuery = ''
     this.filterStatus = ''
+    this.filterEmailStatus = ''
     this.showFilterPanel = false
   }
 
   filteredParticipants() {
     return _.filter(this.participants, participant => {
       const matchesSearch = !this.searchQuery || _.some(
-        ['firstName', 'lastName', 'place'],
+        ['firstName', 'lastName', 'place', 'email'],
         key => _.toLower(participant[key]).includes(_.toLower(this.searchQuery))
       )
       const matchesStatus = !this.filterStatus || (() => {
@@ -119,7 +139,8 @@ export class ParticipantsComponent implements OnInit, OnDestroy {
         }
         return participant.certificateStatus === this.filterStatus
       })()
-      return matchesSearch && matchesStatus
+      const matchesEmailStatus = !this.filterEmailStatus || this.emailStatus(participant) === this.filterEmailStatus
+      return matchesSearch && matchesStatus && matchesEmailStatus
     })
   }
 

@@ -24,6 +24,7 @@
             "wat_member",
             "frac_admin",
             "frac_read",
+            "frac_ai_creator",
             "playlist_admin",
             "playlist_read"
           ]
@@ -75,6 +76,21 @@
           "requiredRoles": [
             "frac_admin",
             "frac_read"
+          ]
+        },
+        {
+          "name": "FRAC Studio",
+          "key": "fracStudio",
+          "fragment": false,
+          "render": true,
+          "badges": {
+            "enabled": false,
+            "uri": ""
+          },
+          "enabled": true,
+          "routerLink": "/app/home/frac-studio",
+          "requiredRoles": [
+            "frac_ai_creator"
           ]
         },
         {

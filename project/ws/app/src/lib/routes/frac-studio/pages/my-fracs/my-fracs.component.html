@@ -1,0 +1,86 @@
+<div class="library">
+  <div class="loading" *ngIf="loading">
+    <div class="shimmer"></div>
+    <div class="shimmer"></div>
+  </div>
+  <div class="error" *ngIf="error" role="alert">{{ error }}</div>
+
+  <ng-container *ngIf="!loading && !error">
+    <section class="block">
+      <div class="block-head">
+        <h2 class="block-title">FRACs</h2>
+        <button type="button" class="btn-secondary" (click)="createNew()" *appHideForViewOnly>Create FRAC</button>
+      </div>
+
+      <div class="empty" *ngIf="!fracs.length">
+        <p>No FRACs yet. Create one from a brief, or open a reviewed workbook in the Creator.</p>
+      </div>
+
+      <div class="table-wrap" *ngIf="fracs.length">
+        <table>
+          <thead>
+            <tr>
+              <th wsFracSort="cadre" [sortWith]="fracSort">Position</th>
+              <th wsFracSort="state" [sortWith]="fracSort">State</th>
+              <th wsFracSort="step" [sortWith]="fracSort">Step</th>
+              <th wsFracSort="activities" [sortWith]="fracSort" title="Sorts by activities">Roles / Activities / Competencies</th>
+              <th wsFracSort="worst" [sortWith]="fracSort">Worst finding</th>
+              <th wsFracSort="updatedAt" [sortWith]="fracSort">Updated</th>
+              <th><span class="sr-only">Open</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of fracSort.rows(fracs); trackBy: trackByRowId">
+              <ng-container *ngIf="row.item as f">
+                <td>{{ f.cadre }}<span class="imported" *ngIf="f.imported"> · imported</span></td>
+                <td>{{ f.state }}</td>
+                <td>{{ f.step }} of 6</td>
+                <td>{{ f.counts.roles }} / {{ f.counts.activities }} / {{ f.counts.competencies }}</td>
+                <td><span class="sev" [ngClass]="'sev-' + f.worst">{{ severityLabel(f.worst) }}</span></td>
+                <td>{{ f.updatedAt | date: 'mediumDate' }}</td>
+                <td><button type="button" class="link" (click)="openFrac(f.id)">Open</button></td>
+              </ng-container>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head">
+        <h2 class="block-title">Reviews</h2>
+      </div>
+
+      <div class="empty" *ngIf="!reviews.length">
+        <p>No reviews yet. Upload a FRAC workbook in the Review tab.</p>
+      </div>
+
+      <div class="table-wrap" *ngIf="reviews.length">
+        <table>
+          <thead>
+            <tr>
+              <th wsFracSort="title" [sortWith]="reviewSort">Workbook</th>
+              <th wsFracSort="cadre" [sortWith]="reviewSort">Position</th>
+              <th wsFracSort="state" [sortWith]="reviewSort">State</th>
+              <th wsFracSort="worst" [sortWith]="reviewSort">Worst finding</th>
+              <th wsFracSort="createdAt" [sortWith]="reviewSort">Reviewed</th>
+              <th><span class="sr-only">Open</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of reviewSort.rows(reviews); trackBy: trackByRowId">
+              <ng-container *ngIf="row.item as r">
+                <td>{{ r.title }}</td>
+                <td>{{ r.cadre || '—' }}</td>
+                <td>{{ r.state || '—' }}</td>
+                <td><span class="sev" [ngClass]="'sev-' + r.worst">{{ severityLabel(r.worst) }}</span></td>
+                <td>{{ r.createdAt | date: 'mediumDate' }}</td>
+                <td><button type="button" class="link" (click)="openReview(r.id)">Open</button></td>
+              </ng-container>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</div>

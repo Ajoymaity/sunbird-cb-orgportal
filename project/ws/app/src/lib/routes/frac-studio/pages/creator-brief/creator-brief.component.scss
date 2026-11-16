@@ -1,0 +1,95 @@
+@import '../../frac-studio-common';
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: $v2-space-3;
+  align-items: start;
+
+  @media (max-width: 1180px) { grid-template-columns: 1fr; }
+}
+
+.brief {
+  display: flex;
+  flex-direction: column;
+  gap: $v2-space-3;
+  min-width: 0;
+}
+
+.step-card { @include fs-step-card; }
+.field { @include fs-field; }
+.select-field { @include fs-select; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $v2-space-2;
+  align-items: end;
+
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+// Position matching result under the Position field
+.match {
+  font-size: $v2-font-caption;
+}
+
+.match-checking,
+.match-new {
+  margin: 0;
+  color: $v2-color-text-secondary;
+}
+
+.match-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px $v2-space-2;
+  border: 1px solid $v2-color-primary;
+  border-radius: $v2-radius-input;
+  background: $v2-color-primary-tint;
+  cursor: pointer;
+
+  input { margin-top: 3px; }
+
+  // A match with separate ticks for its postings and its roles
+  &.stacked {
+    flex-direction: column;
+    gap: 8px;
+    cursor: default;
+  }
+}
+
+.match-text { margin: 0; }
+
+.match-option {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  cursor: pointer;
+}
+
+.match-note {
+  color: $v2-color-text-secondary;
+  font-size: $v2-font-micro;
+}
+
+.match-warn {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: $v2-radius-input;
+  background: $v2-status-warning-bg;
+  color: $v2-status-warning-text;
+  font-size: $v2-font-caption;
+}
+
+.hint {
+  margin: 0;
+  color: $v2-color-text-secondary;
+  font-size: $v2-font-caption;
+}
+
+.actions { display: flex; gap: 12px; }
+.btn-primary { @include v2-btn-primary; }
+.error { @include fs-error; }
