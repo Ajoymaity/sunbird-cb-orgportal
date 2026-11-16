@@ -27,9 +27,9 @@ import { takeUntil } from 'rxjs/operators'
   /* tslint:enable */
 })
 export class MyDashboardHomeComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
-  constructor(private router: Router, private configSvc: ConfigurationsService, private http: HttpClient) { }
+  constructor(private readonly router: Router, private readonly configSvc: ConfigurationsService, private readonly http: HttpClient) { }
 
   ngOnDestroy() {
     this.destroy$.next()

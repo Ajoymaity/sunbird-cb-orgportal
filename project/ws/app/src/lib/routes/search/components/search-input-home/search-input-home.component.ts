@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChange, ViewChild, ViewEncapsulation } from '@angular/core'
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChange, SimpleChanges, ViewChild, ViewEncapsulation } from '@angular/core'
 import { UntypedFormControl } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ConfigurationsService } from '@sunbird-cb/utils'
@@ -16,7 +16,7 @@ import { SearchServService } from '../../services/search-serv.service'
   encapsulation: ViewEncapsulation.None,
 })
 export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   @Input() placeHolder = ''
   @Input() ref = ''
   @Output() closed: EventEmitter<boolean> = new EventEmitter()
@@ -34,11 +34,11 @@ export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
   lang = ''
 
   constructor(
-    private activated: ActivatedRoute,
-    private router: Router,
-    private searchServSvc: SearchServService,
-    private configSvc: ConfigurationsService,
-    private route: ActivatedRoute,
+    private readonly activated: ActivatedRoute,
+    private readonly router: Router,
+    private readonly searchServSvc: SearchServService,
+    private readonly configSvc: ConfigurationsService,
+    private readonly route: ActivatedRoute,
 
   ) {
     // if (!this.activated.snapshot.data.searchPageData) {
@@ -51,6 +51,9 @@ export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
     // } else {
     // this.autoFilter();
     // }
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    throw new Error('Method not implemented.')
   }
   autoFilter() {
     if (this.route.snapshot.data.searchPageData) {
@@ -94,7 +97,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
     this.languageSearch = this.route.snapshot.data.searchPageData && this.route.snapshot.data.searchPageData.data.search.languageSearch.map(
       (u: string) => u.toLowerCase(),
     )
-    this.languageSearch = this.languageSearch.sort()
+    this.languageSearch = this.languageSearch.sort((a: string, b: string) => a.localeCompare(b))
     this.swapRemove(this.languageSearch, this.languageSearch.indexOf('all'), 0)
     if (this.preferredLanguages && this.preferredLanguages.split(',').length > 1) {
       this.languageSearch.splice(1, 0, this.preferredLanguages)
@@ -108,27 +111,19 @@ export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit() {
     // if (!this.activated.snapshot.data.searchPageData) {
-      this.searchServSvc.getSearchConfig().then(data => {
-        this.activated.snapshot.data = {
-          searchPageData: { data },
-        }
-      }).then(() => {
-        this.autoFilter()
-        this.init()
-      })
+    this.searchServSvc.getSearchConfig().then(data => {
+      this.activated.snapshot.data = {
+        searchPageData: { data },
+      }
+    }).then(() => {
+      this.autoFilter()
+      this.init()
+    })
     // } else {
     //   this.autoFilter();
     //   this.init();
     // }
   }
-  ngOnChanges() {
-    for (const change in SimpleChange) {
-      if (change === 'placeHolder') {
-        this.placeHolder = this.placeHolder
-      }
-    }
-  }
-
   swapRemove(langArray: string[], from: number, to: number) {
     langArray.splice(to, 0, langArray[from])
     langArray.splice(from + 1, 1)

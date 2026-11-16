@@ -1,12 +1,12 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
 import { BreakpointObserver } from '@angular/cdk/layout'
-import { DomSanitizer } from '@angular/platform-browser'
 import { ActivatedRoute } from '@angular/router'
 import { of } from 'rxjs'
 
 import { PublicAboutComponent } from './public-about.component'
 import { ConfigurationsService } from '@sunbird-cb/utils'
+import { SanitizerService } from '../../../services/sanitizer.service'
 
 describe('PublicAboutComponent', () => {
   let component: PublicAboutComponent
@@ -23,10 +23,10 @@ describe('PublicAboutComponent', () => {
           },
         },
         {
-          provide: DomSanitizer,
+          provide: SanitizerService,
           useValue: {
-            bypassSecurityTrustStyle: jest.fn().mockReturnValue(''),
-            bypassSecurityTrustResourceUrl: jest.fn().mockReturnValue(''),
+            trustStyleUrl: jest.fn().mockReturnValue(''),
+            trustResourceUrl: jest.fn().mockReturnValue(''),
           },
         },
         {

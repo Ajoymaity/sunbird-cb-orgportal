@@ -98,12 +98,6 @@
   margin-right: 6px;
 }
 
-.app-btn.icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
 :host ::ng-deep .unsaved-changes-dialog .mat-mdc-dialog-surface {
   padding: 0;
   border-radius: 12.6px;
@@ -138,7 +132,7 @@
     padding: 6px 0px 6px 0px;
 
     h2 {
-      font-family: Roboto;
+      font-family: Roboto, sans-serif;
       font-weight: 600;
       font-size: 32px;
       margin: 0;
@@ -203,6 +197,8 @@
     align-items: center;
     gap: 16px;
   }
+
+  position: relative;
 }
 
 // ============= TOOLBAR SECTIONS =============
@@ -475,6 +471,10 @@
   }
 
   &.icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
     padding: 6px 16px !important;
 
     &.blue {
@@ -710,11 +710,6 @@
     font-size: 13px;
     font-weight: 500;
   }
-}
-
-// Make parent relative for overlay positioning
-.upload-container {
-  position: relative;
 }
 
 @keyframes upload-orbit-spin {

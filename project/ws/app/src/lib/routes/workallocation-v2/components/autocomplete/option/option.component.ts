@@ -14,7 +14,7 @@ export class OptionComponent implements OnInit {
   @Input() value!: string
   click!: Observable<string>
 
-  constructor(private host: ElementRef) {
+  constructor(private readonly host: ElementRef) {
   }
 
   ngOnInit() {

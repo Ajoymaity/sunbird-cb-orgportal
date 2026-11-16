@@ -3,6 +3,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { of } from 'rxjs'
 import { ConfigurationsService } from '@sunbird-cb/utils'
+import { SanitizerService } from '../../services/sanitizer.service'
 
 import { LoginComponent } from './login.component'
 
@@ -38,6 +39,12 @@ describe('LoginComponent', () => {
             restrictedFeatures: null,
           },
         },
+        {
+          provide: SanitizerService,
+          useValue: {
+            trustResourceUrl: jest.fn((u: string) => u),
+          },
+        },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     })
@@ -52,5 +59,11 @@ describe('LoginComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy()
+  })
+
+  it('should populate config from route data on ngOnInit', () => {
+    expect(component.isClientLogin).toBe(false)
+    expect(component.title).toBe('')
+    expect(component.contactUs).toBe(false)
   })
 })

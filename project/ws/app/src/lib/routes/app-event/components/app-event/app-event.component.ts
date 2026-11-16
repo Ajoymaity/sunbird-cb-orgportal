@@ -9,19 +9,18 @@ import { takeUntil } from 'rxjs/operators'
   standalone: false,
   selector: 'ws-app-app-event',
   templateUrl: './app-event.component.html',
-  styleUrls: ['./app-event.component.scss'],
 })
 export class AppEventComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   data: any
   error = false
   isRegisteredUser = false
   isEnabled = true
   pageNavbar: Partial<NsPage.INavBackground> = this.configSvc.pageNavBar
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private appEventSvc: EventService,
-    private configSvc: ConfigurationsService,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly appEventSvc: EventService,
+    private readonly configSvc: ConfigurationsService,
   ) { }
 
   ngOnInit() {

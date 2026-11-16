@@ -51,7 +51,7 @@ export class WatCompPopupComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<WatCompPopupComponent>,
     @Inject(MAT_DIALOG_DATA) public data: IWatCompPopupData,
-    private formBuilder: UntypedFormBuilder) {
+    private readonly formBuilder: UntypedFormBuilder) {
     this.watForm = new UntypedFormGroup({})
 
     this.watForm = this.formBuilder.group({
@@ -154,12 +154,12 @@ export class WatCompPopupComponent implements OnInit {
   }
   checkAll() {
     const onj = { isSelected: true }
-    this.getList.controls.map(value => value.setValue({ ...value.value, ...onj }))
+    this.getList.controls.forEach(value => value.setValue({ ...value.value, ...onj }))
   }
 
   deselectAll() {
     const onj = { isSelected: false }
-    this.getList.controls.map(value => value.setValue({ ...value.value, ...onj }))
+    this.getList.controls.forEach(value => value.setValue({ ...value.value, ...onj }))
     // this.setWatValues([...this.getList.controls.map(value => value.setValue(false))])
   }
   get checkedAllActivities() {

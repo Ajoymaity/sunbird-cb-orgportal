@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChange, ViewChild, ViewEncapsulation } from '@angular/core'
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core'
 import { UntypedFormControl } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ConfigurationsService } from '@sunbird-cb/utils'
@@ -15,8 +15,8 @@ import { SearchServService } from '../../services/search-serv.service'
   // tslint:disable-next-line
   encapsulation: ViewEncapsulation.None,
 })
-export class SearchInputComponent implements OnInit, OnChanges, OnDestroy {
-  private destroy$ = new Subject<void>()
+export class SearchInputComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>()
   @Input() placeHolder = ''
   @Input() ref = ''
   @Output() closed: EventEmitter<boolean> = new EventEmitter()
@@ -36,11 +36,11 @@ export class SearchInputComponent implements OnInit, OnChanges, OnDestroy {
   lang = ''
 
   constructor(
-    private activated: ActivatedRoute,
-    private router: Router,
-    private searchServSvc: SearchServService,
-    private configSvc: ConfigurationsService,
-    private route: ActivatedRoute,
+    private readonly activated: ActivatedRoute,
+    private readonly router: Router,
+    private readonly searchServSvc: SearchServService,
+    private readonly configSvc: ConfigurationsService,
+    private readonly route: ActivatedRoute,
   ) {
     const isAutoCompleteAllowed = this.route.snapshot.data.searchPageData.data.search.isAutoCompleteAllowed
     if (typeof isAutoCompleteAllowed === 'undefined' ||
@@ -79,7 +79,7 @@ export class SearchInputComponent implements OnInit, OnChanges, OnDestroy {
     this.languageSearch = this.route.snapshot.data.searchPageData.data.search.languageSearch.map(
       (u: string) => u.toLowerCase(),
     )
-    this.languageSearch = this.languageSearch.sort()
+    this.languageSearch = this.languageSearch.sort((a: string, b: string) => a.localeCompare(b))
     this.swapRemove(this.languageSearch, this.languageSearch.indexOf('all'), 0)
     if (this.preferredLanguages && this.preferredLanguages.split(',').length > 1) {
       this.languageSearch.splice(1, 0, this.preferredLanguages)
@@ -88,14 +88,6 @@ export class SearchInputComponent implements OnInit, OnChanges, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next()
     this.destroy$.complete()
-  }
-
-  ngOnChanges() {
-    for (const change in SimpleChange) {
-      if (change === 'placeHolder') {
-        this.placeHolder = this.placeHolder
-      }
-    }
   }
 
   swapRemove(langArray: string[], from: number, to: number) {

@@ -15,7 +15,7 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./interest.component.scss'],
 })
 export class InterestComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   interestsData: any
   selectedContent = 0
   selectedInterest = ''
@@ -29,13 +29,13 @@ export class InterestComponent implements OnInit, OnDestroy {
   interestToAddMultiple: string[] = []
   pageNavbar: Partial<NsPage.INavBackground> = this.configSvc.pageNavBar
   alreadyAddedInterest = new Set<string>()
-  constructor(private activateRoute: ActivatedRoute,
-              private contentSvc: WidgetContentService,
-              private playlistSvc: BtnPlaylistService,
-              private configSvc: ConfigurationsService,
-              private router: Router,
+  constructor(private readonly activateRoute: ActivatedRoute,
+    private readonly contentSvc: WidgetContentService,
+    private readonly playlistSvc: BtnPlaylistService,
+    private readonly configSvc: ConfigurationsService,
+    private readonly router: Router,
     // private interestSvc: InterestService,
-              private snackbar: MatSnackBar) { }
+    private readonly snackbar: MatSnackBar) { }
   @ViewChild('createPlaylistSuccess', { static: true }) createPlaylistSuccessMessage!: ElementRef<any>
   @ViewChild('createPlaylistError', { static: true }) createPlaylistErrorMessage!: ElementRef<any>
   playlistsSubscription: Subscription | null = null

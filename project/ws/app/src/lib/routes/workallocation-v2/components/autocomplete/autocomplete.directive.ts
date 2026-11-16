@@ -13,13 +13,13 @@ import { NgControl } from '@angular/forms'
 export class AutocompleteDirective implements OnInit, OnDestroy {
   @Input() wsAppAutocomplete!: AutocompleteComponent
   private overlayRef!: OverlayRef | null
-  private destroyed$ = new Subject<void>()
+  private readonly destroyed$ = new Subject<void>()
 
   constructor(
-    private host: ElementRef<HTMLInputElement>,
-    private ngControl: NgControl,
-    private vcr: ViewContainerRef,
-    private overlay: Overlay
+    private readonly host: ElementRef<HTMLInputElement>,
+    private readonly ngControl: NgControl,
+    private readonly vcr: ViewContainerRef,
+    private readonly overlay: Overlay
   ) {
   }
 

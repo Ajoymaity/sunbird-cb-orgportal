@@ -3,7 +3,7 @@ import { NeedApprovalsService } from '../../services/need-approvals.service'
 import { MatDialog } from '@angular/material/dialog'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { ActivatedRoute, Router, Event, NavigationEnd } from '@angular/router'
-import { NSProfileDataV2 } from '../../models/profile-v2.model'
+import { NSProfileDataV2 } from '../../../home/models/profile-v2.model'
 import { Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
 // tslint:disable
@@ -17,7 +17,7 @@ import _ from 'lodash'
 })
 
 export class NeedsApprovalComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   @ViewChild('approveDialog', { static: false })
   approveDialog!: TemplateRef<any>
   @ViewChild('rejectDialog', { static: false })
@@ -33,10 +33,10 @@ export class NeedsApprovalComponent implements OnInit, OnDestroy {
   comment = ''
 
   constructor(
-    private needApprService: NeedApprovalsService,
-    private activeRoute: ActivatedRoute,
-    private router: Router,
-    public dialog: MatDialog, private matSnackBar: MatSnackBar) {
+    private readonly needApprService: NeedApprovalsService,
+    private readonly activeRoute: ActivatedRoute,
+    private readonly router: Router,
+    public readonly dialog: MatDialog, private readonly matSnackBar: MatSnackBar) {
     this.activeRoute.data.pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
       this.profileData = data.pageData.data.profileData
     })

@@ -31,10 +31,10 @@ export class CertificateGeneratorComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private eventService: EventService,
-    private configSvc: ConfigurationsService
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly eventService: EventService,
+    private readonly configSvc: ConfigurationsService
   ) { }
 
   ngOnInit(): void {
@@ -116,7 +116,9 @@ export class CertificateGeneratorComponent implements OnInit, OnDestroy {
           console.error('Error updating event: non ', error)
         }
       )
-      // this.isGenerating = false // Hide loader
+      // Clear the busy flag before leaving: this path never called the generate API, and
+      // leaving it set left the button spinning if the user came back to this screen.
+      this.isGenerating = false
       this.navigateBack()
       return
     } else {

@@ -8,10 +8,10 @@ import { NAVIGATION_DATA_INCOMING } from '../models/mobile-events.model'
   providedIn: 'root',
 })
 export class NavigationExternalService implements OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   dummy = 1
-  constructor(private router: Router) {
+  constructor(private readonly router: Router) {
     fromEvent(document, NAVIGATION_DATA_INCOMING).pipe(takeUntil(this.destroy$)).subscribe((event: CustomEventInit) => {
       this.navigateTo(event.detail.url, event.detail.params)
     })

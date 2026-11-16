@@ -19,8 +19,8 @@ export class SignupComponent implements OnDestroy {
   @ViewChild('toastError', { static: true }) toastError!: ElementRef<any>
 
   constructor(
-    private snackBar: MatSnackBar,
-    private signupService: SignupService,
+    private readonly snackBar: MatSnackBar,
+    private readonly signupService: SignupService,
   ) {
     this.signupForm = new UntypedFormGroup({
       fname: new UntypedFormControl('', [Validators.required]),

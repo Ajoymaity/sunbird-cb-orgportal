@@ -34,7 +34,7 @@ type GridStyle = 'horizontal' | 'vertical' | 'both' | 'none'
   styleUrls: ['./upload-activity-list-table.component.scss'],
 })
 export class UploadActivityListTableComponent implements OnChanges, AfterViewInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   // ============= INPUTS =============
 

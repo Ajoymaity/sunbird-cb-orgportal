@@ -1,11 +1,12 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core'
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
+import { SafeUrl } from '@angular/platform-browser'
 import { IBtnAppsConfig, CustomTourService } from '@sunbird-cb/collection'
 import { NsWidgetResolver } from '@sunbird-cb/resolver'
 import { ConfigurationsService, NsPage } from '@sunbird-cb/utils'
 import { Router, NavigationStart, NavigationEnd, Event } from '@angular/router'
 import { Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
+import { SanitizerService } from 'src/app/services/sanitizer.service'
 
 @Component({
   standalone: false,
@@ -14,7 +15,7 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./app-nav-bar.component.scss'],
 })
 export class AppNavBarComponent implements OnInit, OnChanges, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   isDashboardReport: boolean = false
   @Input() mode: 'top' | 'bottom' = 'top'
   // @Input()
@@ -39,10 +40,10 @@ export class AppNavBarComponent implements OnInit, OnChanges, OnDestroy {
   showAppNavBar = false
   popupTour: any
   constructor(
-    private domSanitizer: DomSanitizer,
-    private configSvc: ConfigurationsService,
-    private tourService: CustomTourService,
-    private router: Router,
+    private readonly sanitizerService: SanitizerService,
+    private readonly configSvc: ConfigurationsService,
+    private readonly tourService: CustomTourService,
+    private readonly router: Router,
   ) {
     this.btnAppsConfig = { ...this.basicBtnAppsConfig }
     if (this.configSvc.restrictedFeatures) {
@@ -79,12 +80,12 @@ export class AppNavBarComponent implements OnInit, OnChanges, OnDestroy {
     })
 
     if (this.configSvc.instanceConfig) {
-      this.appIcon = this.domSanitizer.bypassSecurityTrustResourceUrl(
+      this.appIcon = this.sanitizerService.trustResourceUrl(
         'https://aastar-assets.s3.ap-south-1.amazonaws.com/mdo-frac/icons/Foundation-secondary.svg',
       )
       this.instanceVal = this.configSvc.rootOrg || ''
       if (this.configSvc.instanceConfig.logos.appBottomNav) {
-        this.appBottomIcon = this.domSanitizer.bypassSecurityTrustResourceUrl(
+        this.appBottomIcon = this.sanitizerService.trustResourceUrl(
           this.configSvc.instanceConfig.logos.appBottomNav,
         )
       }

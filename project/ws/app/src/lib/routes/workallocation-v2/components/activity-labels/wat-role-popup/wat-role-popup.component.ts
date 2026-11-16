@@ -40,7 +40,7 @@ export class WatRolePopupComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<WatRolePopupComponent>,
     @Inject(MAT_DIALOG_DATA) public data: IWatRolePopupData,
-    private formBuilder: UntypedFormBuilder) {
+    private readonly formBuilder: UntypedFormBuilder) {
     this.watForm = new UntypedFormGroup({})
     this.watForm = this.formBuilder.group({
       acDetail: this.formBuilder.array([]),
@@ -103,12 +103,12 @@ export class WatRolePopupComponent implements OnInit {
   }
   checkAll() {
     const onj = { isSelected: true }
-    this.getList.controls.map(value => value.setValue({ ...value.value, ...onj }))
+    this.getList.controls.forEach(value => value.setValue({ ...value.value, ...onj }))
   }
 
   deselectAll() {
     const onj = { isSelected: false }
-    this.getList.controls.map(value => value.setValue({ ...value.value, ...onj }))
+    this.getList.controls.forEach(value => value.setValue({ ...value.value, ...onj }))
     // this.setWatValues([...this.getList.controls.map(value => value.setValue(false))])
   }
   get checkedAllActivities() {

@@ -12,7 +12,7 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./search-root.component.scss'],
 })
 export class SearchRootComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   searchTabs: IFeatureSearchConfig = {
     tabs: [],
     routeValue: [],
@@ -21,10 +21,10 @@ export class SearchRootComponent implements OnInit, OnDestroy {
   }
   route = 'learning'
   searchRequest: {
-    query: string;
-    filters: { [type: string]: string[] };
-    social?: string;
-    sort?: string;
+    query: string
+    filters: { [type: string]: string[] }
+    social?: string
+    sort?: string
   } = {
       query: '',
       filters: {},
@@ -34,9 +34,9 @@ export class SearchRootComponent implements OnInit, OnDestroy {
   selectedIndex = 0
   pageNavbar: Partial<NsPage.INavBackground> = this.configSvc.pageNavBar
   constructor(
-    private router: Router,
-    private activated: ActivatedRoute,
-    private configSvc: ConfigurationsService,
+    private readonly router: Router,
+    private readonly activated: ActivatedRoute,
+    private readonly configSvc: ConfigurationsService,
   ) { }
 
   ngOnInit() {

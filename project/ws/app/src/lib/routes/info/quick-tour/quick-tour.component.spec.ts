@@ -1,8 +1,8 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { ConfigurationsService } from '@sunbird-cb/utils'
 
 import { QuickTourComponent } from './quick-tour.component'
-import { ConfigurationsService } from '@sunbird-cb/utils'
 
 describe('QuickTourComponent', () => {
   let component: QuickTourComponent
@@ -16,8 +16,10 @@ describe('QuickTourComponent', () => {
         {
           provide: ConfigurationsService,
           useValue: {
+            pageNavBar: {},
             instanceConfig: {
               tourVideo: { en: 'https://example.com/video.mp4' },
+              details: { appName: '' },
             },
             activeLocale: null,
           },

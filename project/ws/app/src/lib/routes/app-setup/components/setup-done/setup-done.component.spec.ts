@@ -1,11 +1,11 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
-import { DomSanitizer } from '@angular/platform-browser'
 import { MatDialog } from '@angular/material/dialog'
 import { Router, ActivatedRoute } from '@angular/router'
 import { of } from 'rxjs'
 import { ConfigurationsService } from '@sunbird-cb/utils'
 import { Globals } from '../../globals'
+import { SanitizerService } from 'src/app/services/sanitizer.service'
 
 import { SetupDoneComponent } from './setup-done.component'
 
@@ -26,8 +26,8 @@ describe('SetupDoneComponent', () => {
     snapshot: { params: {}, queryParams: {}, data: {} },
   }
 
-  const mockDomSanitizer = {
-    bypassSecurityTrustResourceUrl: jest.fn().mockReturnValue(''),
+  const mockSanitizerService = {
+    trustResourceUrl: jest.fn().mockReturnValue(''),
   }
 
   const mockMatDialog = {
@@ -50,7 +50,7 @@ describe('SetupDoneComponent', () => {
       providers: [
         { provide: ConfigurationsService, useValue: mockConfigurationsService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: DomSanitizer, useValue: mockDomSanitizer },
+        { provide: SanitizerService, useValue: mockSanitizerService },
         { provide: MatDialog, useValue: mockMatDialog },
         { provide: Router, useValue: mockRouter },
         { provide: Globals, useValue: mockGlobals },

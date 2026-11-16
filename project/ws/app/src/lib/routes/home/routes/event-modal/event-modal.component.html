@@ -25,7 +25,8 @@
           <label class="form-label" for="eventDate">Select the Date *</label>
           <div class="field-wrapper">
             <input type="date" id="eventDate" class="form-input" formControlName="eventDate" />
-            <span class="field-error" *ngIf="eventForm.get('eventDate')?.invalid && eventForm.get('eventDate')?.touched">
+            <span class="field-error"
+              *ngIf="eventForm.get('eventDate')?.invalid && eventForm.get('eventDate')?.touched">
               Date is required
             </span>
           </div>
@@ -33,8 +34,10 @@
         <div>
           <label class="form-label" for="eventLocation">Location *</label>
           <div class="field-wrapper">
-            <input type="text" id="eventLocation" class="form-input" formControlName="eventLocation" placeholder="Enter location" />
-            <span class="field-error" *ngIf="eventForm.get('eventLocation')?.invalid && eventForm.get('eventLocation')?.touched">
+            <input type="text" id="eventLocation" class="form-input" formControlName="eventLocation"
+              placeholder="Enter location" />
+            <span class="field-error"
+              *ngIf="eventForm.get('eventLocation')?.invalid && eventForm.get('eventLocation')?.touched">
               Location is required
             </span>
           </div>
@@ -54,7 +57,8 @@
       <!-- Certificate Type -->
       <label class="form-label" for="certificateType">Participant registration type for Certificate *</label>
       <div class="field-wrapper">
-        <div class="select-wrapper" [class.select-error]="eventForm.get('certificateType')?.invalid && eventForm.get('certificateType')?.touched">
+        <div class="select-wrapper"
+          [class.select-error]="eventForm.get('certificateType')?.invalid && eventForm.get('certificateType')?.touched">
           <select id="certificateType" class="form-select" formControlName="certificateType">
             <option value="" disabled>Choose the certificate type</option>
             <option value="registred with sphere">Registration based</option>
@@ -62,7 +66,8 @@
           </select>
           <span class="select-chevron">&#9660;</span>
         </div>
-        <span class="field-error" *ngIf="eventForm.get('certificateType')?.invalid && eventForm.get('certificateType')?.touched">
+        <span class="field-error"
+          *ngIf="eventForm.get('certificateType')?.invalid && eventForm.get('certificateType')?.touched">
           Please select a certificate type
         </span>
       </div>

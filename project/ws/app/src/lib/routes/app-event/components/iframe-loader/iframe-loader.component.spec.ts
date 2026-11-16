@@ -1,5 +1,6 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { ActivatedRoute } from '@angular/router'
 import { of, BehaviorSubject } from 'rxjs'
 
@@ -12,6 +13,7 @@ describe('IframeLoaderComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [IframeLoaderComponent],
       providers: [
         {
@@ -44,6 +46,7 @@ describe('IframeLoaderComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(IframeLoaderComponent)
     component = fixture.componentInstance
+    component.iframeUrl = 'https://example.com/embed'
     fixture.detectChanges()
   })
 

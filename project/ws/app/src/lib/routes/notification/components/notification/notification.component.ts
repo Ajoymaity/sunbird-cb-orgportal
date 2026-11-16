@@ -12,7 +12,7 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./notification.component.scss'],
 })
 export class NotificationComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   recentBadge: IUserNotification | null = null
   sharedPlaylists: NsPlaylist.IPlaylist[] = []
@@ -23,8 +23,8 @@ export class NotificationComponent implements OnInit, OnDestroy {
   pageNavbar: Partial<NsPage.INavBackground> = this.configSvc.pageNavBar
   constructor(
     // private goalsSvc: BtnGoalsService,
-    private playlistSvc: BtnPlaylistService,
-    private configSvc: ConfigurationsService,
+    private readonly playlistSvc: BtnPlaylistService,
+    private readonly configSvc: ConfigurationsService,
   ) { }
 
   ngOnDestroy() {

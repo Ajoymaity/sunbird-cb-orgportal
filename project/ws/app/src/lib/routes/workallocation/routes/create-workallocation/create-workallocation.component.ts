@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core'
 import { UntypedFormGroup, Validators, UntypedFormBuilder, UntypedFormArray, UntypedFormControl } from '@angular/forms'
-import { AllocationService } from '../../services/allocation.service'
+import { AllocationService } from '../../../workallocation-v2/services/allocation.service'
 import { Router } from '@angular/router'
 import { ExportAsService, ExportAsConfig } from 'ngx-export-as'
 import { MatDialog } from '@angular/material/dialog'
@@ -75,10 +75,10 @@ export class CreateWorkallocationComponent implements OnInit, OnDestroy {
   showAddNewRole = false
 
   constructor(
-    private exportAsService: ExportAsService, private snackBar: MatSnackBar,
-    private fb: UntypedFormBuilder, private allocateSrvc: AllocationService,
-    private router: Router, public dialog: MatDialog,
-    private configSvc: ConfigurationsService) {
+    private readonly exportAsService: ExportAsService, private readonly snackBar: MatSnackBar,
+    private readonly fb: UntypedFormBuilder, private readonly allocateSrvc: AllocationService,
+    private readonly router: Router, public dialog: MatDialog,
+    private readonly configSvc: ConfigurationsService) {
     this.selectedIndex = 0
     this.newAllocationForm = this.fb.group({
       fname: ['', Validators.required],

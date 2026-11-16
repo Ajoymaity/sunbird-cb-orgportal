@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, Inject } from '@angular/core'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { UntypedFormGroup, Validators, UntypedFormBuilder, UntypedFormControl } from '@angular/forms'
-import { AllocationService } from '../../services/allocation.service'
+import { AllocationService } from '../../../workallocation-v2/services/allocation.service'
 import { MatTabGroup } from '@angular/material/tabs'
 import { Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
@@ -61,9 +61,9 @@ export class AllocationActionsComponent implements OnInit, OnDestroy {
   compatecnyLevel: any
 
   constructor(
-    private allocateSrvc: AllocationService,
-    private fb: UntypedFormBuilder,
-    private dialogRef: MatDialogRef<AllocationActionsComponent>,
+    private readonly allocateSrvc: AllocationService,
+    private readonly fb: UntypedFormBuilder,
+    private readonly dialogRef: MatDialogRef<AllocationActionsComponent>,
     @Inject(MAT_DIALOG_DATA) public selectedUser: any
   ) {
 

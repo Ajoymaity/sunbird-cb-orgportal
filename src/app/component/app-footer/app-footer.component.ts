@@ -10,14 +10,14 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./app-footer.component.scss'],
 })
 export class AppFooterComponent implements OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   isXSmall = false
   termsOfUser = true
 
   constructor(
-    private configSvc: ConfigurationsService,
-    private valueSvc: ValueService
+    private readonly configSvc: ConfigurationsService,
+    private readonly valueSvc: ValueService
   ) {
     if (this.configSvc.restrictedFeatures) {
       if (this.configSvc.restrictedFeatures.has('termsOfUser')) {

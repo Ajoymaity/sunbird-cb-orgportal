@@ -1,0 +1,72 @@
+<div class="fp-dialog">
+  <div class="fp-header">
+    <div class="fp-header__left">
+      <mat-icon class="fp-header__icon">preview</mat-icon>
+      <h2 class="fp-header__title">Preview Before Save</h2>
+    </div>
+    <button type="button" class="fp-close" (click)="onCancel()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="fp-scroll">
+    <div class="fp-meta">
+      <div class="fp-meta__item">
+        <span class="fp-meta__label">Component</span>
+        <span class="fp-meta__value">{{ data.component }}</span>
+      </div>
+      <div class="fp-meta__item">
+        <span class="fp-meta__label">Framework</span>
+        <span class="fp-meta__value">{{ data.framework }}</span>
+      </div>
+      <div class="fp-meta__item">
+        <span class="fp-meta__label">Root Org Id</span>
+        <span class="fp-meta__value fp-meta__value--mono">{{ data.rootOrgId }}</span>
+      </div>
+    </div>
+
+    <p class="fp-no-changes" *ngIf="!hasAnyChange">No changes in any section — the saved data will be identical to what's currently on the server.</p>
+
+    <div class="fp-section" *ngFor="let section of sectionDiffs">
+      <button type="button" class="fp-section__header" (click)="toggleSection(section)">
+        <mat-icon class="fp-section__chevron">{{ section.expanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
+        <span class="fp-section__name">{{ section.name }}</span>
+        <span class="fp-section__badge" [class.fp-section__badge--changed]="section.changed">
+          {{ section.changed ? 'Changed' : 'No changes' }}
+        </span>
+      </button>
+
+      <div class="fp-section__body" *ngIf="section.expanded">
+        <div class="fp-diff-view" *ngIf="section.rows as rows">
+          <div class="fp-diff-view__header">
+            <span>Before</span>
+            <span>After</span>
+          </div>
+          <div class="fp-diff-row" *ngFor="let row of rows">
+            <div class="fp-diff-cell" [ngClass]="'fp-diff-cell--' + row.leftType">{{ row.left }}</div>
+            <div class="fp-diff-cell" [ngClass]="'fp-diff-cell--' + row.rightType">{{ row.right }}</div>
+          </div>
+        </div>
+
+        <div class="fp-diff-fallback" *ngIf="!section.rows && section.changed">
+          <p class="fp-diff-fallback__note">This section is too large to diff inline — reviewing both versions side by side.</p>
+          <div class="fp-diff-fallback__cols">
+            <div class="fp-diff-fallback__col">
+              <span class="fp-diff-fallback__label">Before</span>
+              <pre>{{ section.before }}</pre>
+            </div>
+            <div class="fp-diff-fallback__col">
+              <span class="fp-diff-fallback__label">After</span>
+              <pre>{{ section.after }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fp-footer">
+    <button type="button" class="fp-btn-secondary" (click)="onCancel()">Cancel</button>
+    <button type="button" class="fp-btn-primary" (click)="onConfirm()">Confirm &amp; Save</button>
+  </div>
+</div>

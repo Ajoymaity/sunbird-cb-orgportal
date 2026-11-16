@@ -27,36 +27,37 @@ export class CatalogResponseInterceptorService implements HttpInterceptor {
     }
     return next.handle(req).pipe(
       map(event => {
-        if (!(event instanceof HttpResponse)) {
+        if (!(event instanceof HttpResponse) || Array.isArray(event.body)) {
           return event
         }
-        const body = event.body
-        if (Array.isArray(body)) {
-          return event
-        }
-        if (body && typeof body === 'object') {
-          const result = body.result
-          let catalog: any[] | null = null
-          if (Array.isArray(result)) {
-            catalog = result
-          } else if (result && typeof result === 'object') {
-            // Walk common Sunbird nesting shapes
-            for (const key of ['catalog', 'data', 'content', 'children', 'list', 'items']) {
-              if (Array.isArray(result[key])) {
-                catalog = result[key]
-                break
-              }
-            }
-            if (!catalog && result.response && Array.isArray(result.response.content)) {
-              catalog = result.response.content
-            }
-          }
-          // Always return an array — if nothing matched, return [] so SlicePipe never
-          // sees an object.  The menu will show "No categories" which is safe.
-          return event.clone({ body: catalog !== null ? catalog : [] })
+        if (event.body && typeof event.body === 'object') {
+          return event.clone({ body: this.extractCatalogArray(event.body.result) })
         }
         return event
       }),
     )
+  }
+
+  /**
+   * Walks the known Sunbird catalog response shapes to find the actual array.
+   * Always returns an array — if nothing matched, returns [] so SlicePipe never
+   * sees an object. The menu will show "No categories" which is safe.
+   */
+  private extractCatalogArray(result: any): any[] {
+    if (Array.isArray(result)) {
+      return result
+    }
+    if (!result || typeof result !== 'object') {
+      return []
+    }
+    for (const key of ['catalog', 'data', 'content', 'children', 'list', 'items']) {
+      if (Array.isArray(result[key])) {
+        return result[key]
+      }
+    }
+    if (result.response && Array.isArray(result.response.content)) {
+      return result.response.content
+    }
+    return []
   }
 }

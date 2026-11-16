@@ -1,15 +1,11 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { TestBed } from '@angular/core/testing'
-import { provideHttpClient } from '@angular/common/http'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
 
 import { WidgetUserService } from './widget-user.service'
 
 describe('WidgetUserService', () => {
   beforeEach(() => TestBed.configureTestingModule({
-    providers: [
-      provideHttpClient(),
-      provideHttpClientTesting(),
-    ],
+    imports: [HttpClientTestingModule],
   }))
 
   it('should be created', () => {

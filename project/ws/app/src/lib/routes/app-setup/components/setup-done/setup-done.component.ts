@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core'
-import { SafeUrl, DomSanitizer } from '@angular/platform-browser'
+import { SafeUrl } from '@angular/platform-browser'
 import {
   ConfigurationsService,
   NsPage,
@@ -10,6 +10,7 @@ import { Router, ActivatedRoute } from '@angular/router'
 import { Globals } from '../../globals'
 import { Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
+import { SanitizerService } from 'src/app/services/sanitizer.service'
 
 @Component({
   standalone: false,
@@ -18,17 +19,17 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./setup-done.component.scss'],
 })
 export class SetupDoneComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   appIcon: SafeUrl | null = null
   pageNavbar: Partial<NsPage.INavBackground> = this.configSvc.pageNavBar
   badges: any | null = null
   constructor(
-    private configSvc: ConfigurationsService,
-    private route: ActivatedRoute,
-    private domSanitizer: DomSanitizer,
-    private matDialog: MatDialog,
-    private router: Router,
-    private globals: Globals,
+    private readonly configSvc: ConfigurationsService,
+    private readonly route: ActivatedRoute,
+    private readonly sanitizerService: SanitizerService,
+    private readonly matDialog: MatDialog,
+    private readonly router: Router,
+    private readonly globals: Globals,
   ) { }
 
   ngOnInit() {
@@ -36,7 +37,7 @@ export class SetupDoneComponent implements OnInit, OnDestroy {
       this.badges = data.badges.data
     })
     if (this.configSvc.instanceConfig) {
-      this.appIcon = this.domSanitizer.bypassSecurityTrustResourceUrl(
+      this.appIcon = this.sanitizerService.trustResourceUrl(
         this.configSvc.instanceConfig.logos.thumpsUp || '',
       )
     }

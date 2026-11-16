@@ -4,7 +4,7 @@ import { NSWatActivity } from '../../models/activity-wot.model'
 import { AbstractControl, UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms'
 // import { debounceTime } from 'rxjs/operators'
 import { inspect } from 'util'
-import { AllocationService } from '../../../workallocation/services/allocation.service'
+import { AllocationService } from '../../services/allocation.service'
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators'
 import { Observable, Subject } from 'rxjs'
 import { WatStoreService } from '../../services/wat.store.service'
@@ -49,7 +49,7 @@ import * as _ from 'lodash'
   ],
 })
 export class ActivityLabelsComponent implements OnInit, OnDestroy, AfterViewInit {
-  private unsubscribe = new Subject<void>()
+  private readonly unsubscribe = new Subject<void>()
   @Input() editData!: any
   labels: NSWatActivity.IActivity[] = []
   groups: NSWatActivity.IActivityGroup[] = []
@@ -63,11 +63,11 @@ export class ActivityLabelsComponent implements OnInit, OnDestroy, AfterViewInit
   canshowName = 1
   canshow = -1
   constructor(
-    private changeDetector: ChangeDetectorRef,
-    private formBuilder: UntypedFormBuilder,
-    private allocateSrvc: AllocationService,
-    private watStore: WatStoreService,
-    private snackBar: MatSnackBar,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly formBuilder: UntypedFormBuilder,
+    private readonly allocateSrvc: AllocationService,
+    private readonly watStore: WatStoreService,
+    private readonly snackBar: MatSnackBar,
     public dialog: MatDialog,
     // private appRef: ApplicationRef
   ) {
@@ -141,8 +141,8 @@ export class ActivityLabelsComponent implements OnInit, OnDestroy, AfterViewInit
         this.snackBar.open('Empty activity!! You can not drag', undefined, { duration: 2000 })
         return
       }
-      const previousContainerIndex = parseInt(event.previousContainer.id.replace('groups_', ''), 10)
-      const targetContainerIndex = parseInt(event.container.id.replace('groups_', ''), 10)
+      const previousContainerIndex = Number.parseInt(event.previousContainer.id.replace('groups_', ''), 10)
+      const targetContainerIndex = Number.parseInt(event.container.id.replace('groups_', ''), 10)
       // tslint:disable
       // console.log(actualIdx)
       const oldArray = (this.activityForm.get('groupsArray') as any)!.at(previousContainerIndex).get('activities')

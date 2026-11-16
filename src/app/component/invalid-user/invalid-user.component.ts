@@ -6,12 +6,11 @@ import { ActivatedRoute } from '@angular/router'
   standalone: false,
   selector: 'ws-invalid-user',
   templateUrl: './invalid-user.component.html',
-  styleUrls: ['./invalid-user.component.scss'],
 })
 export class InvalidUserComponent implements OnInit, OnDestroy {
   private subscriptionData: Subscription | null = null
   invalidData = ''
-  constructor(private route: ActivatedRoute) { }
+  constructor(private readonly route: ActivatedRoute) { }
 
   ngOnInit() {
     this.subscriptionData = this.route.data.subscribe(data => {

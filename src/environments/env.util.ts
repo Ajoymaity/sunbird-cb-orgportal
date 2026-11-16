@@ -9,6 +9,7 @@ const DEFAULT_REQUIRED_ROLES: string[] = [
   'FRAC_READ',
   'PLAYLIST_ADMIN',
   'PLAYLIST_READ',
+  'MNC_REPORT_VIEWER',
 ]
 
 type EnvMap = { [key: string]: any }

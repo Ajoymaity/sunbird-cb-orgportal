@@ -12,7 +12,7 @@ import { SearchServService } from '../../services/search-serv.service'
   styleUrls: ['./filter-display.component.scss'],
 })
 export class FilterDisplayComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   @Input() filtersResponse: IFilterUnitResponse[] = []
   @Input() routeComp = ''
   @Input() filtersResetAble = false
@@ -26,10 +26,10 @@ export class FilterDisplayComponent implements OnInit, OnDestroy {
       filters: {},
     }
   constructor(
-    private activated: ActivatedRoute,
-    private router: Router,
-    private searchServ: SearchServService,
-    private configSvc: ConfigurationsService,
+    private readonly activated: ActivatedRoute,
+    private readonly router: Router,
+    private readonly searchServ: SearchServService,
+    private readonly configSvc: ConfigurationsService,
   ) { }
 
   ngOnInit() {
@@ -42,7 +42,7 @@ export class FilterDisplayComponent implements OnInit, OnDestroy {
       this.activated.parent &&
       this.activated.parent.snapshot.data.searchPageData.data.search.tabs
     ) {
-      this.activated.parent.snapshot.data.searchPageData.data.search.tabs.map(
+      this.activated.parent.snapshot.data.searchPageData.data.search.tabs.forEach(
         (cur: ISearchConfigContentStrip) => {
           if (
             this.routeComp === cur.titleKey &&

@@ -4,18 +4,17 @@ import { ActivatedRoute } from '@angular/router'
 import * as _ from 'lodash'
 import { Subject } from 'rxjs'
 import { map, takeUntil } from 'rxjs/operators'
-import { UsersService } from '../../../users/services/users.service'
+import { OrgUsersService } from '../../services/org-users.service'
 import { UtilityService } from '../../services/utility.service'
 
 @Component({
   standalone: false,
   selector: 'ws-app-self-assessment',
   templateUrl: './self-assessment.component.html',
-  styleUrls: ['./self-assessment.component.scss'],
   providers: [UtilityService],
 })
 export class SelfAssessmentComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   tableData: any
   usersData: any
@@ -24,9 +23,9 @@ export class SelfAssessmentComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator | undefined
 
   constructor(
-    private route: ActivatedRoute,
-    private usersService: UsersService,
-    @Self() private utilityService: UtilityService
+    private readonly route: ActivatedRoute,
+    private readonly usersService: OrgUsersService,
+    @Self() private readonly utilityService: UtilityService
   ) { }
 
   ngOnInit() {

@@ -12,13 +12,13 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./event-overview.component.scss'],
 })
 export class EventOverviewComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   data: IEventDetails[] = []
   eventFooter: any
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private appEventSvc: EventService,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly appEventSvc: EventService,
   ) { }
 
   ngOnInit() {

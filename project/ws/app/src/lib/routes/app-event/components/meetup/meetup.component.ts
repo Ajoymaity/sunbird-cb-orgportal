@@ -10,15 +10,15 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./meetup.component.scss'],
 })
 export class MeetupComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   pageNavbar: Partial<NsPage.INavBackground> = this.configSvc.pageNavBar
   navBarTitle = 'iGOT Meetup Platform'
   screenSubscription: Subscription | null = null
 
   constructor(
-    private configSvc: ConfigurationsService,
-    private valSvc: ValueService,
+    private readonly configSvc: ConfigurationsService,
+    private readonly valSvc: ValueService,
   ) { }
 
   ngOnInit() {

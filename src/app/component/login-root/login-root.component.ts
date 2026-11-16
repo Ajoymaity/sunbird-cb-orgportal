@@ -6,14 +6,13 @@ import { LoginRootService } from './login-root.service'
   standalone: false,
   selector: 'ws-login-root',
   templateUrl: './login-root.component.html',
-  styleUrls: ['./login-root.component.scss'],
 })
 export class LoginRootComponent implements OnInit {
 
   @ViewChild(LoginRootDirective, { static: true }) wsLoginRoot!: LoginRootDirective
   constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private loginRootSvc: LoginRootService,
+    private readonly componentFactoryResolver: ComponentFactoryResolver,
+    private readonly loginRootSvc: LoginRootService,
   ) { }
 
   loadComponent() {

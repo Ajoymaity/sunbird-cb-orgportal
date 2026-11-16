@@ -3,7 +3,7 @@ import { UntypedFormGroup, Validators, UntypedFormBuilder, UntypedFormArray, Unt
 import { ExportAsService, ExportAsConfig } from 'ngx-export-as'
 import { ActivatedRoute, Router } from '@angular/router'
 import { MatSnackBar } from '@angular/material/snack-bar'
-import { AllocationService } from '../../services/allocation.service'
+import { AllocationService } from '../../../workallocation-v2/services/allocation.service'
 import { ConfigurationsService } from '@sunbird-cb/utils'
 import { Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
@@ -70,9 +70,9 @@ export class UpdateWorkallocationComponent implements OnInit, OnDestroy {
   currentTime = new Date()
 
   constructor(
-    private exportAsService: ExportAsService, private snackBar: MatSnackBar, private router: Router,
-    private fb: UntypedFormBuilder, private allocateSrvc: AllocationService,
-    private activeRoute: ActivatedRoute, private configSvc: ConfigurationsService) {
+    private readonly exportAsService: ExportAsService, private readonly snackBar: MatSnackBar, private readonly router: Router,
+    private readonly fb: UntypedFormBuilder, private readonly allocateSrvc: AllocationService,
+    private readonly activeRoute: ActivatedRoute, private readonly configSvc: ConfigurationsService) {
     this.allocateduserID = this.activeRoute.snapshot.params.userId
 
     this.newAllocationForm = this.fb.group({

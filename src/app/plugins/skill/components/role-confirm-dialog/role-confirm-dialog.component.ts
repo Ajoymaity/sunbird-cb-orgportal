@@ -10,7 +10,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 export class RoleConfirmDialogComponent {
 
   constructor(
-    private dialogRef: MatDialogRef<RoleConfirmDialogComponent>,
+    private readonly dialogRef: MatDialogRef<RoleConfirmDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
   }

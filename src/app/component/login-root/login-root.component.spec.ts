@@ -1,9 +1,10 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
 import { LoginRootService } from './login-root.service'
-import { LoginRootDirective } from './login-root.directive'
 
 import { LoginRootComponent } from './login-root.component'
+import { LoginRootDirective } from './login-root.directive'
+import { LoginComponent } from '../login/login.component'
 
 describe('LoginRootComponent', () => {
   let component: LoginRootComponent
@@ -11,7 +12,7 @@ describe('LoginRootComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [LoginRootComponent, LoginRootDirective],
+      declarations: [LoginRootComponent, LoginRootDirective, LoginComponent],
       providers: [
         {
           provide: LoginRootService,
@@ -34,5 +35,9 @@ describe('LoginRootComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy()
+  })
+
+  it('should call loadComponent on ngOnInit', () => {
+    expect(component.loadComponent).toHaveBeenCalled()
   })
 })

@@ -1,5 +1,4 @@
 @import 'ws-design-system-v2';
-
 // ── Page container ─────────────────────────────────────────────────────────
 .container {
   padding: $v2-content-padding;
@@ -34,7 +33,33 @@
 }
 
 .create-btn {
-  @include v2-btn-primary;
+  background-color: #1C5D95;
+  color: #ffffff !important;
+  border-radius: 100px;
+  padding: 0 25px;
+  height: 30px;
+  border: none;
+  cursor: pointer;
+}
+
+// .create-btn:hover {
+//   background-color: #0056b3;
+// }
+
+
+
+.events-list ul {
+  list-style: none;
+  /* Removes the bullets */
+  padding: 0;
+  margin: 0;
+}
+
+.events-list li {
+
+  padding: 10px 0px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 15px;
 }
 
 // ── Search + filter row ────────────────────────────────────────────────────
@@ -203,6 +228,40 @@
   font-weight: 500;
 }
 
+.events-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+:host table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.events-table th,
+.events-table td {
+  // border: 1px solid #ddd;
+  // padding: 8px;
+
+  padding: 14px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  font-family: Roboto, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+}
+
+.events-table th {
+  // background-color: #f2f2f2;
+  // text-align: left;
+
+  background-color: #F5F5F5;
+  color: #8A8787;
+}
+
+.events-table tr:hover {
+  background-color: #f1f1f1;
+}
 .tag-remove {
   background: none;
   border: none;
@@ -410,4 +469,12 @@ mat-paginator {
 @media (max-width: 480px) {
   .container { padding: 16px; }
   .header { flex-direction: column; align-items: flex-start; gap: $v2-space-2; }
+}
+
+// ── Loading skeleton ───────────────────────────────────────────────────────
+.skeleton-row .skeleton-cell {
+  @include v2-shimmer;
+  display: block;
+  height: 12px;
+  width: 100%;
 }

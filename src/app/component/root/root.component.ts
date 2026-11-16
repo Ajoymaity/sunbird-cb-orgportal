@@ -52,7 +52,7 @@ export class RootComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('appUpdateBody', { static: true })
   appUpdateBodyRef: ElementRef | null = null
 
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   isXSmall$ = this.valueSvc.isXSmall$
   routeChangeInProgress = false
   showNavbar = false
@@ -62,19 +62,19 @@ export class RootComponent implements OnInit, AfterViewInit, OnDestroy {
   appStartRaised = false
   isSetupPage = false
   constructor(
-    private router: Router,
+    private readonly router: Router,
     // public authSvc: AuthKeycloakService,
-    private appRef: ApplicationRef,
-    private logger: LoggerService,
-    private swUpdate: SwUpdate,
-    private dialog: MatDialog,
+    private readonly appRef: ApplicationRef,
+    private readonly logger: LoggerService,
+    private readonly swUpdate: SwUpdate,
+    private readonly dialog: MatDialog,
     public configSvc: ConfigurationsService,
-    private valueSvc: ValueService,
+    private readonly valueSvc: ValueService,
     // private telemetrySvc: TelemetryService,
-    private mobileAppsSvc: MobileAppsService,
-    private rootSvc: RootService,
-    private btnBackSvc: BreadcrumbsOrgService,
-    private changeDetector: ChangeDetectorRef,
+    private readonly mobileAppsSvc: MobileAppsService,
+    private readonly rootSvc: RootService,
+    private readonly btnBackSvc: BreadcrumbsOrgService,
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.mobileAppsSvc.init()
   }

@@ -15,7 +15,7 @@ import { SearchServService } from '../../services/search-serv.service'
   encapsulation: ViewEncapsulation.None,
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   query: UntypedFormControl = new UntypedFormControl('')
   pageNavbar: Partial<NsPage.INavBackground> = this.configSvc.pageNavBar
@@ -27,10 +27,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   languageSearch: string[] = []
   suggestedFilters: ISuggestedFilters[] = []
   constructor(
-    private configSvc: ConfigurationsService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private searchSvc: SearchServService,
+    private readonly configSvc: ConfigurationsService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly searchSvc: SearchServService,
   ) {
     const isAutoCompleteAllowed = this.route.snapshot.data.pageData.data.search.isAutoCompleteAllowed
     if (typeof isAutoCompleteAllowed === 'undefined' ||
@@ -136,10 +136,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.languageSearch = this.route.snapshot.data.pageData.data.search.languageSearch.map(
         (u: string) => u.toLowerCase(),
       )
-      this.languageSearch = this.languageSearch.sort()
+      this.languageSearch = this.languageSearch.sort((a: string, b: string) => a.localeCompare(b))
       this.swapRemove(this.languageSearch, this.languageSearch.indexOf('all'), 0)
       if (this.preferredLanguages && this.preferredLanguages.split(',').length > 1) {
-      this.languageSearch.splice(1, 0, this.preferredLanguages)
+        this.languageSearch.splice(1, 0, this.preferredLanguages)
       }
     })
     this.searchSvc.getSearchConfig().then(res => {

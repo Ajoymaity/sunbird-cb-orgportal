@@ -3,7 +3,7 @@ import { CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angul
 import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms'
 // import { debounceTime } from 'rxjs/operators'
 import { inspect } from 'util'
-import { AllocationService } from '../../../workallocation/services/allocation.service'
+import { AllocationService } from '../../services/allocation.service'
 import { debounceTime, first, map, switchMap, takeUntil } from 'rxjs/operators'
 import { BehaviorSubject, Observable, Subject } from 'rxjs'
 import { WatStoreService } from '../../services/wat.store.service'
@@ -27,7 +27,7 @@ import { DialogConfirmComponent } from '../../../../../../../../../src/app/compo
 })
 export class CompetencyLabelsComponent implements OnInit, OnDestroy, AfterViewInit {
   private activitySubscription: any
-  private unsubscribe = new Subject<void>()
+  private readonly unsubscribe = new Subject<void>()
   labels: NSWatCompetency.ICompActivity[] = []
   groups: NSWatActivity.IActivityGroup[] = []
   @Input() editData!: any
@@ -42,13 +42,13 @@ export class CompetencyLabelsComponent implements OnInit, OnDestroy, AfterViewIn
   filteredCompetenciesV1 = new BehaviorSubject<any[]>([])
 
   constructor(
-    private changeDetector: ChangeDetectorRef,
-    private formBuilder: UntypedFormBuilder,
-    private allocateSrvc: AllocationService,
-    private watStore: WatStoreService,
-    private snackBar: MatSnackBar,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly formBuilder: UntypedFormBuilder,
+    private readonly allocateSrvc: AllocationService,
+    private readonly watStore: WatStoreService,
+    private readonly snackBar: MatSnackBar,
     public dialog: MatDialog,
-    private activated: ActivatedRoute,
+    private readonly activated: ActivatedRoute,
     // @Inject(DOCUMENT) private document: Document
   ) {
   }
@@ -167,8 +167,8 @@ export class CompetencyLabelsComponent implements OnInit, OnDestroy, AfterViewIn
         this.snackBar.open('Competency Name is required to drag', undefined, { duration: 2000 })
         return
       }
-      const previousContainerIndex = parseInt(event.previousContainer.id.replace('compe_', ''), 10)
-      const targetContainerIndex = parseInt(event.container.id.replace('compe_', ''), 10)
+      const previousContainerIndex = Number.parseInt(event.previousContainer.id.replace('compe_', ''), 10)
+      const targetContainerIndex = Number.parseInt(event.container.id.replace('compe_', ''), 10)
       // tslint:disable
       // console.log(actualIdx)
       const oldArray = (this.activityForm.get('groupsArray') as any)!.at(previousContainerIndex).get('competincies')

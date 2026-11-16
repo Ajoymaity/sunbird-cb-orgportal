@@ -1,17 +1,14 @@
 import { TestBed } from '@angular/core/testing'
-import { provideHttpClient } from '@angular/common/http'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { ConfigurationsService } from '@sunbird-cb/utils'
 
 import { FracService } from './frac.service'
 
 describe('FracService', () => {
   beforeEach(() => TestBed.configureTestingModule({
+    imports: [HttpClientTestingModule],
     providers: [
-      FracService,
-      provideHttpClient(),
-      provideHttpClientTesting(),
-      { provide: ConfigurationsService, useValue: { baseUrl: '' } },
+      { provide: ConfigurationsService, useValue: { baseUrl: '', instanceConfig: {} } },
     ],
   }))
 

@@ -14,7 +14,7 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./filter-dialog.component.scss'],
 })
 export class FilterDialogComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   districtUrl = '../../../mdo-assets/files/district.json'
   stateUrl = '../../../mdo-assets/files/state.json'
   disticts: any
@@ -102,10 +102,10 @@ export class FilterDialogComponent implements OnInit, OnDestroy {
 
   //#region (constructor)
   constructor(
-    private fb: UntypedFormBuilder,
+    private readonly fb: UntypedFormBuilder,
     public dialogRef: MatDialogRef<FilterDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private http: HttpClient
+    private readonly http: HttpClient
   ) {
     this.filterForm = this.fb.group({
       role: [''],

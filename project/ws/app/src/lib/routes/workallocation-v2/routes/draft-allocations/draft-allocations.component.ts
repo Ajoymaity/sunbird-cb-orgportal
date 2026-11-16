@@ -39,8 +39,8 @@ export class DraftAllocationsComponent implements OnInit, OnDestroy, OnChanges {
   workorderID: any
   workorderData: any
   p: number = 1
-  constructor(private activated: ActivatedRoute, private router: Router, private uploadService: UploadFileService,
-    public dialog: MatDialog, private allocateSrvc: AllocationService) {
+  constructor(private readonly activated: ActivatedRoute, private readonly router: Router, private readonly uploadService: UploadFileService,
+    public readonly dialog: MatDialog, private readonly allocateSrvc: AllocationService) {
     this.activated.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((queryParams: any) => {
       if (queryParams.has('status')) {
         this.queryParams = queryParams.get('status') || ''

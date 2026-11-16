@@ -13,7 +13,7 @@ import { EventModalComponent } from '../event-modal/event-modal.component'
   styleUrls: ['./event-details.component.scss'],
 })
 export class EventDetailsComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   event: any // Stores the fetched event details
   activeTab = 'overview'

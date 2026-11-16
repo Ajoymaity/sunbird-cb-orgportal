@@ -10,7 +10,7 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./view-users.component.scss'],
 })
 export class ViewUsersComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   userData: {
     userArray: any[],
     noOfUser: string
@@ -18,7 +18,7 @@ export class ViewUsersComponent implements OnInit, OnDestroy {
   userDataList: any[] = []
   searchControl = new UntypedFormControl()
   constructor(
-    private dialogRef: MatDialogRef<ViewUsersComponent>,
+    private readonly dialogRef: MatDialogRef<ViewUsersComponent>,
     @Inject(MAT_DIALOG_DATA) data: {
       userArray: any[],
       noOfUser: string

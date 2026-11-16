@@ -13,7 +13,7 @@ import moment from 'moment'
   styleUrls: ['./add-competency-dialog.component.scss'],
 })
 export class AddCompetencyDialogComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   addCompetencyForm!: UntypedFormGroup
   aastrikaFormBuilder: UntypedFormBuilder
@@ -48,7 +48,7 @@ export class AddCompetencyDialogComponent implements OnInit, OnDestroy {
 
   constructor(
     formBuilder: UntypedFormBuilder,
-    private competencySvc: CompetencyService,
+    private readonly competencySvc: CompetencyService,
     public dialogRef: MatDialogRef<AddCompetencyDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {

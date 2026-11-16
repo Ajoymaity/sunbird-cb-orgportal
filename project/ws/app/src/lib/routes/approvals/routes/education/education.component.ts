@@ -10,9 +10,9 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./education.component.scss'],
 })
 export class EducationComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   academicDetails: any
-  constructor(private activeRoute: ActivatedRoute, private router: Router) {
+  constructor(private readonly activeRoute: ActivatedRoute, private readonly router: Router) {
     this.router.events.pipe(takeUntil(this.destroy$)).subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
         // const profileData = this.activeRoute.snapshot.data.profileData.data.result.UserProfile[0] || {}

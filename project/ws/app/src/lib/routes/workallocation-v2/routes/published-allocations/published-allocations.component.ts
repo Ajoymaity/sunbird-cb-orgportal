@@ -38,8 +38,8 @@ export class PublishedAllocationsComponent implements OnInit, OnDestroy, OnChang
   workorderID: any
   workorderData: any
   p: number = 1
-  constructor(private activated: ActivatedRoute, private exportAsService: ExportAsService,
-    private allocateSrvc: AllocationService) {
+  constructor(private readonly activated: ActivatedRoute, private readonly exportAsService: ExportAsService,
+    private readonly allocateSrvc: AllocationService) {
     this.activated.params.pipe(takeUntil(this.destroy$)).subscribe((param: any) => {
       this.workorderID = param['workorder'] || ''
       this.getAllocatedUsers(this.workorderID)

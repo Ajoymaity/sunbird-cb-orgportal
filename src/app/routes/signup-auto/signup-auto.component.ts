@@ -12,7 +12,7 @@ import { takeUntil } from 'rxjs/operators'
   styleUrls: ['./signup-auto.component.scss'],
 })
 export class SignupAutoComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   fetching = false
   showResonse = false
   uniqueId: any
@@ -21,9 +21,9 @@ export class SignupAutoComponent implements OnInit, OnDestroy {
   @ViewChild('toastError', { static: true }) toastError!: ElementRef<any>
 
   constructor(
-    private snackBar: MatSnackBar,
-    private signupAutoService: SignupAutoService,
-    private route: ActivatedRoute,
+    private readonly snackBar: MatSnackBar,
+    private readonly signupAutoService: SignupAutoService,
+    private readonly route: ActivatedRoute,
   ) { }
 
   ngOnInit() {

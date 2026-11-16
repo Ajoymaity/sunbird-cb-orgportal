@@ -91,6 +91,17 @@
   border-bottom: 1px solid $v2-color-border;
 }
 
+:host {
+  th,
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+  }
+}
 .filter-section-label {
   font-family: $v2-font-family;
   font-size: 11px;
@@ -226,7 +237,7 @@
   @include v2-table-container;
 }
 
-table {
+:host table {
   @include v2-table-inner;
 }
 
@@ -273,4 +284,12 @@ table {
   .participants-header { flex-direction: column; align-items: flex-start; }
   .search-input { width: 100%; }
   .cert-summary { flex-wrap: wrap; }
+}
+
+// ── Loading skeleton ───────────────────────────────────────────────────────
+.skeleton-row .skeleton-cell {
+  @include v2-shimmer;
+  display: block;
+  height: 12px;
+  width: 100%;
 }

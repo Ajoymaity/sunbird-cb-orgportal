@@ -22,7 +22,7 @@ import { takeUntil } from 'rxjs/operators'
   ],
 })
 export class AppSetupHomeComponent implements OnInit, AfterViewInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
   currentIndex = 0
   appLanguage = ''
   chosenLang = ''
@@ -53,7 +53,7 @@ export class AppSetupHomeComponent implements OnInit, AfterViewInit, OnDestroy {
   //   | SettingsComponent
   //   | undefined = undefined
 
-  constructor(private configSvc: ConfigurationsService, private matDialog: MatDialog) { }
+  constructor(private readonly configSvc: ConfigurationsService, private readonly matDialog: MatDialog) { }
 
   ngOnInit(): void {
     // if (this.configSvc.restrictedFeatures) {

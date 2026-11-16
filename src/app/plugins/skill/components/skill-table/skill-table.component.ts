@@ -19,7 +19,7 @@ import { UserAutoCompleteService } from '../../services/user-auto-complete.servi
   styleUrls: ['./skill-table.component.scss'],
 })
 export class SkillTableComponent implements OnInit, OnChanges, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   @Input() tableData!: any | undefined
   @Input() data?: []
@@ -87,9 +87,9 @@ export class SkillTableComponent implements OnInit, OnChanges, OnDestroy {
  * subscribe the value and user autocomplete service
  */
     this.modelChanged.pipe(debounceTime(1000),
-                           distinctUntilChanged(),
-                           filter(val => typeof val === 'string'),
-                           switchMap((value: string) => {
+      distinctUntilChanged(),
+      filter(val => typeof val === 'string'),
+      switchMap((value: string) => {
         if (typeof value === 'string' && value) {
           return this.userAutoCompleteService.fetchUserList(value)
         }
@@ -97,7 +97,7 @@ export class SkillTableComponent implements OnInit, OnChanges, OnDestroy {
 
         return of([])
       }),
-                           takeUntil(this.destroy$)
+      takeUntil(this.destroy$)
     ).subscribe((users: any) => {
       this.dataSource.data = users
       this.dataSource.paginator = this.paginator
@@ -112,8 +112,7 @@ export class SkillTableComponent implements OnInit, OnChanges, OnDestroy {
   }
   applyFilter(filterValue: any) {
     if (filterValue) {
-      let fValue = filterValue.trim()
-      fValue = filterValue.toLowerCase()
+      const fValue = filterValue.trim().toLowerCase()
       this.dataSource.filter = fValue
     } else {
       this.dataSource.filter = ''

@@ -15,7 +15,7 @@ import { Router } from '@angular/router'
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>()
+  private readonly destroy$ = new Subject<void>()
 
   showMarkAsRead = false
   pageNavbar: Partial<NsPage.INavBackground> = this.configSvc.pageNavBar
@@ -25,13 +25,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   infoNotificationsFetchStatus: TFetchStatus
   actionNotificationsNextPage?: string
   infoNotificationsNextPage?: string
-  private pageSize: number
+  private readonly pageSize: number
 
   constructor(
-    private configSvc: ConfigurationsService,
-    private notificationApi: NotificationApiService,
-    private notificationSvc: NotificationService,
-    private router: Router,
+    private readonly configSvc: ConfigurationsService,
+    private readonly notificationApi: NotificationApiService,
+    private readonly notificationSvc: NotificationService,
+    private readonly router: Router,
   ) {
     this.pageSize = 5
     this.actionNotifications = []
@@ -96,7 +96,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
           notification.seen = true
-        },         noop)
+        }, noop)
     }
 
     this.notificationSvc.mapRoute(notification)

@@ -5,7 +5,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
   standalone: false,
   selector: 'ws-app-player-dialog',
   templateUrl: './player-dialog.component.html',
-  styleUrls: ['./player-dialog.component.scss'],
 })
 export class PlayerDialogComponent implements OnInit {
 

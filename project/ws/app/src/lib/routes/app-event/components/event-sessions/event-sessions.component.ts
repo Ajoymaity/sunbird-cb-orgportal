@@ -21,9 +21,9 @@ export class EventSessionsComponent implements OnInit, OnDestroy {
   private currentSubscription: Subscription | null = null
 
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private appEventSvc: EventService,
-    private changeDetector: ChangeDetectorRef,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly appEventSvc: EventService,
+    private readonly changeDetector: ChangeDetectorRef,
   ) { }
 
   ngOnInit() {
@@ -50,7 +50,7 @@ export class EventSessionsComponent implements OnInit, OnDestroy {
           this.currentSubscription = timer(0, 60000)
             .subscribe(() => {
               this.liveSpeaker = []
-              this.sessionStartTime.map(
+              this.sessionStartTime.forEach(
                 (v: number, index: number) => {
                   this.sessionStartTime[index] = v - 60000
                   this.sessionEndTime[index] = this.sessionEndTime[index] - 60000
@@ -76,8 +76,8 @@ export class EventSessionsComponent implements OnInit, OnDestroy {
   calculateTime() {
     if (this.data) {
       this.data.forEach((speaker: ISpeakerDetails) => {
-        const startTime = Date.parse(speaker.startTime) - Date.parse(Date())
-        const endTime = Date.parse(speaker.endTime) - Date.parse(Date())
+        const startTime = Date.parse(speaker.startTime) - Date.parse(String(new Date()))
+        const endTime = Date.parse(speaker.endTime) - Date.parse(String(new Date()))
         this.sessionStartTime.push(startTime)
         this.sessionEndTime.push(endTime)
       })

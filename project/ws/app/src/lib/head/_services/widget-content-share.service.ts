@@ -17,7 +17,7 @@ const API_END_POINTS = {
 export class WidgetContentShareService {
   baseUrl = this.configSvc.sitePath
 
-  constructor(private http: HttpClient, private configSvc: ConfigurationsService) { }
+  constructor(private readonly http: HttpClient, private readonly configSvc: ConfigurationsService) { }
 
   fetchConfigFile(): Observable<ICommon> {
     return this.http.get<ICommon>(`${this.baseUrl}/feature/common.json`).pipe()

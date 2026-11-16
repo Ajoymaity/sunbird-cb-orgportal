@@ -1,9 +1,8 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
-import { of } from 'rxjs'
-import { BehaviorSubject } from 'rxjs'
-
+import { of, BehaviorSubject } from 'rxjs'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { AppEventComponent } from './app-event.component'
 import { EventService } from '../../services/event.service'
 import { ConfigurationsService } from '@sunbird-cb/utils'
@@ -15,14 +14,17 @@ describe('AppEventComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AppEventComponent],
+      imports: [HttpClientTestingModule],
       providers: [
         {
           provide: ActivatedRoute,
           useValue: {
-            data: of({}),
-            snapshot: { params: {}, queryParams: {}, data: {} },
+            data: of({ pageData: { data: {} }, eventdata: { data: {} } }),
+            paramMap: of({ get: () => null }),
             params: of({}),
             queryParams: of({}),
+            snapshot: { paramMap: { get: () => null }, queryParamMap: { get: () => null }, data: {}, params: {}, queryParams: {} },
+            parent: { data: of({ eventdata: { data: {} } }), params: of({}) },
           },
         },
         {

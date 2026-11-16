@@ -15,13 +15,13 @@ export interface IParticipantElement {
 }
 
 @Component({
-  standalone: false,
+    standalone: false,
     selector: 'ws-app-participants',
     templateUrl: './participants.component.html',
     styleUrls: ['./participants.component.scss'],
 })
 export class ParticipantsComponent implements OnInit, OnDestroy {
-    private destroy$ = new Subject<void>()
+    private readonly destroy$ = new Subject<void>()
 
     participants: any = []
     displayedColumns: string[] = ['select', 'fullname', 'email']

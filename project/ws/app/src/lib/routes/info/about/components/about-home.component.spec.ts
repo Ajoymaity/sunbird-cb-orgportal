@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router'
 import { of } from 'rxjs'
 import { BreakpointObserver } from '@angular/cdk/layout'
 import { ConfigurationsService } from '@sunbird-cb/utils'
-
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { AboutHomeComponent } from './about-home.component'
 
 describe('AboutHomeComponent', () => {
@@ -14,6 +14,7 @@ describe('AboutHomeComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AboutHomeComponent],
+      imports: [HttpClientTestingModule],
       providers: [
         {
           provide: BreakpointObserver,
@@ -26,16 +27,18 @@ describe('AboutHomeComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            data: of({ pageData: { data: null } }),
-            snapshot: { params: {}, queryParams: {}, data: {} },
+            data: of({ pageData: { data: {} }, eventdata: { data: {} } }),
+            paramMap: of({ get: () => null }),
             params: of({}),
             queryParams: of({}),
+            snapshot: { paramMap: { get: () => null }, queryParamMap: { get: () => null }, data: {}, params: {}, queryParams: {} },
+            parent: { data: of({ eventdata: { data: {} } }), params: of({}) },
           },
         },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     })
-    .compileComponents()
+      .compileComponents()
   }))
 
   beforeEach(() => {
