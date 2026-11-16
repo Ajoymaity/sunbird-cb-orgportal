@@ -52,10 +52,10 @@
     </ng-template>
 
     <div class="dirty" *ngIf="frac.rolesDirty" role="status">
-      <span>Roles changed after competencies were derived. Re-derive competencies, or check the Competency@Level mappings
+      <span>Activities changed after they were mapped to competencies. Map them again, or check the Competency@Level mappings
         by hand and mark them checked.</span>
       <span class="dirty-actions" *appHideForViewOnly>
-        <button type="button" class="text-btn" (click)="runStep('competencies')" [disabled]="!canRun">Re-derive competencies</button>
+        <button type="button" class="text-btn" (click)="mapActivities()" [disabled]="!canRun">Map activities to competencies</button>
         <button type="button" class="text-btn" (click)="markMappingChecked()">Mapping checked</button>
       </span>
     </div>
@@ -169,7 +169,8 @@
         <p class="sheet-note comp-source" *ngIf="frac.uploads?.competencies as sheet" role="status">From your competency sheet
           <strong>{{ sheet }}</strong>, uploaded on the Research tab. The roles step maps each activity to these competencies.</p>
         <p class="sheet-note comp-source" *ngIf="!frac.uploads?.competencies && !frac.competencies.length">Competencies are
-          derived from the activities, after Roles &amp; activities. To use your own, upload a competency sheet on the Research tab.</p>
+          derived by the agent from the research, before Roles &amp; activities; the roles step then maps every activity to them.
+          To use your own, upload a competency sheet on the Research tab.</p>
         <ws-app-frac-rule-checks *ngIf="frac.competencies.length" [checks]="quickChecksFor('competencies')"></ws-app-frac-rule-checks>
         <ws-app-frac-competency-editor [competencies]="frac.competencies"
           [usedBy]="usedBy" [prefix]="prefix" (competenciesChange)="onCompetenciesChange($event)">
@@ -194,8 +195,7 @@
         <div class="dirty" role="status" *ngIf="frac.review && frac.reviewStale">The FRAC changed after this check, so these
           findings may already be fixed. Re-run the check to see what is left. A download now is a draft.</div>
         <ws-app-frac-review-report *ngIf="frac.review" [report]="frac.review" [fixableCodes]="competencyCodes"
-          [canFix]="canRun" (fixFinding)="fixFinding($event)" (fixAll)="fixAllFindings($event)"
-          (replaceOutdated)="replaceOutdatedName($event)"></ws-app-frac-review-report>
+          [canFix]="canRun" [lastFix]="frac.lastFix || null" (fixFinding)="fixFinding($event)" (fixAll)="fixAllFindings()"></ws-app-frac-review-report>
       </div>
 
       <ws-app-frac-version-history *ngSwitchCase="'history'" [fracId]="frac.id" [refreshKey]="historyKey"

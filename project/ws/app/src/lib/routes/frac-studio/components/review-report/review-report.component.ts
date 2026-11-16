@@ -1,6 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { FRAC_STUDIO_LADDER_FIX_USD, FRAC_STUDIO_SEVERITY_LABELS, FRAC_STUDIO_TRIAGE_LABELS } from '../../constants/frac-studio.constants'
-import { FracFinding, FracReport } from '../../models/frac-studio.models'
+import {
+  FRAC_STUDIO_FIX_CONTENT_USD, FRAC_STUDIO_LADDER_FIX_USD, FRAC_STUDIO_RECHECK_USD, FRAC_STUDIO_SEVERITY_LABELS,
+  FRAC_STUDIO_TRIAGE_LABELS,
+} from '../../constants/frac-studio.constants'
+import { FracFinding, FracLastFix, FracReport } from '../../models/frac-studio.models'
 import { normalizeCode } from '../../utils/frac-studio-refs.util'
 
 /** An "Outdated reference: …" finding from the check's outdated-name list. */
@@ -18,11 +21,12 @@ export class ReviewReportComponent {
   /** Normalised competency codes that can be fixed from here (the Creator); null in the Reviewer. */
   @Input() fixableCodes: Set<string> | null = null
   @Input() canFix = false
+  /** The FRAC's last "Fix all findings" summary (the Creator); shown while it is newer than this report. */
+  @Input() lastFix: FracLastFix | null = null
+  /** "Fix" on one finding: the service fixes just that finding with the agent. */
   @Output() readonly fixFinding = new EventEmitter<FracFinding>()
-  /** Every open finding that names this FRAC's competencies, fixed together in one ladders run. */
-  @Output() readonly fixAll = new EventEmitter<FracFinding[]>()
-  /** "Replace with …" on an outdated-name finding: a plain text swap in the service, no AI. */
-  @Output() readonly replaceOutdated = new EventEmitter<FracFinding>()
+  /** "Fix all findings": the service fixes every open finding with the agent in one job. */
+  @Output() readonly fixAll = new EventEmitter<void>()
 
   readonly severityLabels = FRAC_STUDIO_SEVERITY_LABELS
 
@@ -58,47 +62,40 @@ export class ReviewReportComponent {
   }
 
   /**
-   * "Fix these competencies" rewrites ladders, so it is offered only for findings about ladder text: Bloom's verbs, the
-   * ladder shape, and scope findings quoting a level. Outdated names (Replace), missing types or competencies
-   * (structure, coverage) and state fit ("Does not reflect …") live elsewhere and stay for a hand fix.
+   * Findings the service fixes by rewriting ladders (Bloom's verbs, ladder shape, scope in a level, outdated names in a
+   * level) for the competencies they name. Used only for the cost estimate: every finding is fixed by the agent.
    */
-  fixable(finding: FracFinding): boolean {
+  private aboutLadders(finding: FracFinding): boolean {
     const codes = this.fixableCodes
-    const aboutLadders = finding.check === 'bloom' || finding.check === 'ladder'
-      || (finding.check === 'context' && !isOutdated(finding) && !finding.title.startsWith('Does not reflect'))
-    return !!codes && !finding.fixed && aboutLadders && finding.refs.some(ref => codes.has(normalizeCode(ref)))
+    const kind = finding.check === 'bloom' || finding.check === 'ladder' || isOutdated(finding)
+      || (finding.check === 'context' && !finding.title.startsWith('Does not reflect'))
+    return !!codes && !finding.fixed && kind && finding.refs.some(ref => codes.has(normalizeCode(ref)))
   }
 
-  /** Outdated-name findings whose fix is a plain swap ("Replace with VHSND."): the service replaces the name everywhere. */
-  replaceable(finding: FracFinding): boolean {
-    return !!this.fixableCodes && !finding.fixed && isOutdated(finding) && /^Replace with /.test(finding.fix)
+  /** Every open finding, in the Creator only (the Reviewer has nothing to fix). */
+  get openFindings(): FracFinding[] {
+    return this.fixableCodes ? (this.report?.findings ?? []).filter(f => !f.fixed) : []
   }
 
-  /** "Replace with VHSND (no AI)" from the finding's own fix text. */
-  replaceLabel(finding: FracFinding): string {
-    return `${finding.fix.replace(/\.\s*$/, '')} (no AI)`
-  }
-
-  /** Open findings the agent can fix by rewriting the competencies they name. */
-  get fixableOpen(): FracFinding[] {
-    return (this.report?.findings ?? []).filter(f => this.fixable(f))
-  }
-
-  /** Open findings that name no competency (activities, roles, coverage): fixed by hand or with a revise. */
-  get handOpen(): number {
-    return this.fixableCodes
-      ? (this.report?.findings ?? []).filter(f => !f.fixed && !this.fixable(f) && !this.replaceable(f)).length
-      : 0
-  }
-
-  /** "about $0.10" for rewriting every competency the fixable findings name. */
+  /**
+   * "about $0.10": ladders for the competencies ladder findings name, plus one agent call when any finding is about
+   * content (activities, coverage, structure, state fit). New competencies add a little more for their ladders.
+   */
   get fixAllCost(): string {
     const codes = this.fixableCodes
     if (!codes) {
       return ''
     }
-    const named = new Set(this.fixableOpen.flatMap(f => f.refs.map(normalizeCode).filter(code => codes.has(code))))
-    return `about $${Math.max(0.01, named.size * FRAC_STUDIO_LADDER_FIX_USD).toFixed(2)}`
+    const ladders = this.openFindings.filter(f => this.aboutLadders(f))
+    const named = new Set(ladders.flatMap(f => f.refs.map(normalizeCode).filter(code => codes.has(code))))
+    // Anything that is not purely a ladder finding (outdated names included) goes through the one content call
+    const content = this.openFindings.some(f => !this.aboutLadders(f) || isOutdated(f)) ? FRAC_STUDIO_FIX_CONTENT_USD : 0
+    return `about $${(named.size * FRAC_STUDIO_LADDER_FIX_USD + content + FRAC_STUDIO_RECHECK_USD).toFixed(2)}`
+  }
+
+  /** The last fix's summary, saved after the check it re-ran; a later check (run on its own) hides it. */
+  get lastFixShown(): FracLastFix | null {
+    return this.lastFix && this.report && this.lastFix.at > this.report.at ? this.lastFix : null
   }
 
   foundBy(finding: FracFinding): string {

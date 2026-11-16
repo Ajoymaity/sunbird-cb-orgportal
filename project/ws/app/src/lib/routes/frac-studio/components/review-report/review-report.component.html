@@ -30,15 +30,18 @@
   <div class="findings">
     <h3 class="section-title">Findings</h3>
     <p class="empty" *ngIf="!report.findings.length">No findings.</p>
-    <div class="fix-all" *ngIf="fixableOpen.length || handOpen">
-      <button type="button" class="fix-all-btn" *ngIf="fixableOpen.length" [disabled]="!canFix" (click)="fixAll.emit(fixableOpen)">
-        Fix all findings</button>
-      <span class="fix-all-note">
-        <ng-container *ngIf="fixableOpen.length">The agent rewrites the affected competency ladders in one run ({{ fixAllCost }}),
-          then re-run the expert check.</ng-container>
-        <ng-container *ngIf="handOpen">{{ handOpen }} {{ handOpen === 1 ? 'finding needs' : 'findings need' }} a fix by hand on its
-          tab.</ng-container>
-      </span>
+    <div class="fix-all" *ngIf="openFindings.length">
+      <button type="button" class="fix-all-btn" [disabled]="!canFix" (click)="fixAll.emit()">Fix all findings</button>
+      <span class="fix-all-note">Fixes all {{ openFindings.length }} {{ openFindings.length === 1 ? 'finding' : 'findings' }}
+        in one run ({{ fixAllCost }}): replaces outdated names, rewrites activities and competencies, adds missing competencies
+        with their ladders, then re-runs the expert check and lists anything it could not fix. A version is saved first.</span>
+    </div>
+    <div class="last-fix" role="status" *ngIf="lastFixShown as fix">
+      <p class="last-fix-title">Last fix: {{ fix.fixed }} of {{ fix.total }} {{ fix.total === 1 ? 'finding' : 'findings' }} fixed. The
+        expert check was re-run, and the findings below are what is left.</p>
+      <ul class="last-fix-skipped" *ngIf="fix.skipped.length">
+        <li *ngFor="let s of fix.skipped"><strong>Not fixed: {{ s.finding }}.</strong> {{ s.reason }}</li>
+      </ul>
     </div>
     <article class="finding" *ngFor="let f of report.findings; trackBy: trackByIndex" [class.fixed]="f.fixed">
       <div class="finding-head">
@@ -50,11 +53,8 @@
       <p class="finding-refs" *ngIf="f.refs.length"><strong>Refs:</strong> {{ f.refs.join(', ') }}</p>
       <p class="finding-fix" *ngIf="f.fix"><strong>Suggested fix:</strong> {{ f.fix }}</p>
       <p class="finding-by">{{ foundBy(f) }}</p>
-      <button type="button" class="fix-btn" *ngIf="fixable(f)" [disabled]="!canFix" (click)="fixFinding.emit(f)">
-        Fix these competencies
-      </button>
-      <button type="button" class="fix-btn" *ngIf="replaceable(f)" [disabled]="!canFix" (click)="replaceOutdated.emit(f)">
-        {{ replaceLabel(f) }}
+      <button type="button" class="fix-btn" *ngIf="fixableCodes && !f.fixed" [disabled]="!canFix" (click)="fixFinding.emit(f)">
+        Fix
       </button>
     </article>
   </div>

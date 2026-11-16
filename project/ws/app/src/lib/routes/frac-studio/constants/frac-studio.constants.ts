@@ -13,6 +13,10 @@ export const FRAC_STUDIO_POLL_MS = 2000
 
 /** Rough AI cost of rewriting one competency's ladder (measured ≈ $0.011 on Claude Sonnet), for "Fix all" estimates. */
 export const FRAC_STUDIO_LADDER_FIX_USD = 0.011
+/** Rough AI cost of the one call that fixes content findings (activities, competencies), for the "Fix all" estimate. */
+export const FRAC_STUDIO_FIX_CONTENT_USD = 0.04
+/** Rough AI cost of the expert check a fix re-runs at its end (stored answers make a re-check cheaper than the first). */
+export const FRAC_STUDIO_RECHECK_USD = 0.08
 /** Rough AI cost of re-running a step from the footer, for its label (measured on Claude Sonnet, 9–13 Nov 2026). */
 export const FRAC_STUDIO_RERUN_COST: Record<'research' | 'roles' | 'derive' | 'map', string> = {
   research: '$0.05–0.20',
