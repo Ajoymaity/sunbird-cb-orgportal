@@ -12,6 +12,8 @@
         <button type="button" class="btn-secondary" (click)="createNew()" *appHideForViewOnly>Create FRAC</button>
       </div>
 
+      <div class="error" *ngIf="deleteError" role="alert">{{ deleteError }}</div>
+
       <div class="empty" *ngIf="!fracs.length">
         <p>No FRACs yet. Create one from a brief, or open a reviewed workbook in the Creator.</p>
       </div>
@@ -26,7 +28,7 @@
               <th wsFracSort="activities" [sortWith]="fracSort" title="Sorts by activities">Roles / Activities / Competencies</th>
               <th wsFracSort="worst" [sortWith]="fracSort">Worst finding</th>
               <th wsFracSort="updatedAt" [sortWith]="fracSort">Updated</th>
-              <th><span class="sr-only">Open</span></th>
+              <th><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
@@ -38,7 +40,18 @@
                 <td>{{ f.counts.roles }} / {{ f.counts.activities }} / {{ f.counts.competencies }}</td>
                 <td><span class="sev" [ngClass]="'sev-' + f.worst">{{ severityLabel(f.worst) }}</span></td>
                 <td>{{ f.updatedAt | date: 'mediumDate' }}</td>
-                <td><button type="button" class="link" (click)="openFrac(f.id)">Open</button></td>
+                <td class="row-actions">
+                  <ng-container *ngIf="confirmDelete !== f.id">
+                    <button type="button" class="link" (click)="openFrac(f.id)">Open</button>
+                    <button type="button" class="link danger" (click)="confirmDelete = f.id" *appHideForViewOnly
+                      [attr.aria-label]="'Delete ' + f.cadre + ' · ' + f.state">Delete</button>
+                  </ng-container>
+                  <ng-container *ngIf="confirmDelete === f.id">
+                    <span class="confirm-text">Delete this FRAC and its history? Its reviews stay.</span>
+                    <button type="button" class="link danger" (click)="deleteFrac(f.id)" [disabled]="deleting">Delete</button>
+                    <button type="button" class="link" (click)="confirmDelete = null" [disabled]="deleting">Cancel</button>
+                  </ng-container>
+                </td>
               </ng-container>
             </tr>
           </tbody>

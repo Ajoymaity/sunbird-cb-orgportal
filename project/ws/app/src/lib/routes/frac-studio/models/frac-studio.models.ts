@@ -124,6 +124,8 @@ export interface FracLastFix {
   total: number
   fixed: number
   skipped: { finding: string, reason: string }[]
+  /** What the fix changed (missing on older runs). */
+  changes?: { activities: number, competencies: number, added: number, ladders: number }
 }
 
 export interface Frac {

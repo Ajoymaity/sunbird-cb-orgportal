@@ -39,6 +39,7 @@
     <div class="last-fix" role="status" *ngIf="lastFixShown as fix">
       <p class="last-fix-title">Last fix: {{ fix.fixed }} of {{ fix.total }} {{ fix.total === 1 ? 'finding' : 'findings' }} fixed. The
         expert check was re-run, and the findings below are what is left.</p>
+      <p class="last-fix-changes" *ngIf="changesLine(fix) as line">{{ line }}</p>
       <ul class="last-fix-skipped" *ngIf="fix.skipped.length">
         <li *ngFor="let s of fix.skipped"><strong>Not fixed: {{ s.finding }}.</strong> {{ s.reason }}</li>
       </ul>

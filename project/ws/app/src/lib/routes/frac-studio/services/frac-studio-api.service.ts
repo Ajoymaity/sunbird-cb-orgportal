@@ -119,6 +119,11 @@ export class FracStudioApiService {
     return this.download(API_END_POINTS.TEMPLATE(kind), kind === 'brief' ? 'Job description guide.txt' : `${kind} template.xlsx`)
   }
 
+  /** Deletes the FRAC with its versions and documents; its reviews stay. Refused while a step runs on it. */
+  deleteFrac(id: string): Observable<void> {
+    return this.http.delete<void>(API_END_POINTS.FRAC(id))
+  }
+
   patchFrac(id: string, edits: FracEdits): Observable<Frac> {
     return this.http.patch<{ frac: Frac }>(API_END_POINTS.FRAC(id), edits).pipe(map(res => res.frac))
   }

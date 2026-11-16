@@ -52,12 +52,8 @@
     </ng-template>
 
     <div class="dirty" *ngIf="frac.rolesDirty" role="status">
-      <span>Activities changed after they were mapped to competencies. Map them again, or check the Competency@Level mappings
-        by hand and mark them checked.</span>
-      <span class="dirty-actions" *appHideForViewOnly>
-        <button type="button" class="text-btn" (click)="mapActivities()" [disabled]="!canRun">Map activities to competencies</button>
-        <button type="button" class="text-btn" (click)="markMappingChecked()">Mapping checked</button>
-      </span>
+      <span>Activities changed after they were mapped to competencies. They are mapped again automatically a few seconds
+        after you stop editing.</span>
     </div>
 
     <!-- Earlier steps changed after these: the tracker marks them Needs attention until re-run, edited or checked -->

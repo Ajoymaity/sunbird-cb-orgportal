@@ -8,6 +8,9 @@ export const FRAC_STUDIO_ROUTES = {
   myFracs: '/app/home/frac-studio/my-fracs',
 }
 
+/** After activity edits are saved, how long to wait for more edits before mapping the activities automatically. */
+export const FRAC_STUDIO_AUTO_MAP_MS = 4000
+
 /** How often a running job is polled. */
 export const FRAC_STUDIO_POLL_MS = 2000
 

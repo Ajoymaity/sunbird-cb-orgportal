@@ -93,6 +93,21 @@ export class ReviewReportComponent {
     return `about $${(named.size * FRAC_STUDIO_LADDER_FIX_USD + content + FRAC_STUDIO_RECHECK_USD).toFixed(2)}`
   }
 
+  /** "3 activities rewritten · 1 competency changed · 2 added · 4 ladders rewritten"; '' when nothing is recorded. */
+  changesLine(fix: FracLastFix): string {
+    const c = fix.changes
+    if (!c) {
+      return ''
+    }
+    const n = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
+    return [
+      c.activities ? `${n(c.activities, 'activity', 'activities')} rewritten` : '',
+      c.competencies ? `${n(c.competencies, 'competency', 'competencies')} changed` : '',
+      c.added ? `${c.added} added` : '',
+      c.ladders ? `${n(c.ladders, 'ladder', 'ladders')} rewritten` : '',
+    ].filter(Boolean).join(' · ')
+  }
+
   /** The last fix's summary, saved after the check it re-ran; a later check (run on its own) hides it. */
   get lastFixShown(): FracLastFix | null {
     return this.lastFix && this.report && this.lastFix.at > this.report.at ? this.lastFix : null

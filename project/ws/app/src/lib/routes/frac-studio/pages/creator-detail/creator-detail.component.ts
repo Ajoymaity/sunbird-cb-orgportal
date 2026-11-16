@@ -4,6 +4,7 @@ import { Observable, of, Subject, Subscription } from 'rxjs'
 import { catchError, debounceTime, switchMap } from 'rxjs/operators'
 import { FracUploadItem } from '../../components/document-upload/document-upload.component'
 import {
+  FRAC_STUDIO_AUTO_MAP_MS,
   FRAC_STUDIO_LADDER_FIX_USD,
   FRAC_STUDIO_RERUN_COST,
   FRAC_STUDIO_STATES,
@@ -109,6 +110,9 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
   /** Steps an earlier change left out of date (roles is covered by the rolesDirty banner while that is set). */
   stale: Exclude<FracStep, 'brief'>[] = []
   readonly stepTitles = FRAC_STEP_TITLES
+  /** Pending automatic "Map activities to competencies" after activity edits, and whether this round already tried. */
+  private autoMapTimer?: ReturnType<typeof setTimeout>
+  private autoMapTried = false
   readonly states = FRAC_STUDIO_STATES
   /** The brief card's edit form while it is open. */
   briefDraft: { cadre: string, state: string, prompt: string } | null = null
@@ -172,6 +176,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    clearTimeout(this.autoMapTimer)
     this.subs.unsubscribe()
   }
 
@@ -559,12 +564,42 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     return !!this.frac && (this.frac.rolesDirty || changedBefore(this.frac, 'roles') === 'competencies')
   }
 
-  /** "Map activities to competencies": the competencies step maps every activity again; the Roles tab stays open. */
-  mapActivities(): void {
+  /**
+   * Maps every activity to the competencies again (the competencies step maps only while they are current). Runs by
+   * itself after activity edits (scheduleAutoMap); the footer can still offer it. `auto` leaves the open tab alone.
+   */
+  mapActivities(auto = false): void {
     if (this.canRun) {
-      this.tab = 'roles'
+      if (!auto) {
+        this.tab = 'roles'
+      }
       this.startJob(this.api.runStep(this.fracId, 'competencies'), 'The mapping could not be started.')
     }
+  }
+
+  /**
+   * Activities changed after mapping (rolesDirty): map them again automatically once the edits are saved and the team
+   * has paused for FRAC_STUDIO_AUTO_MAP_MS, instead of waiting for a button. One try per round of edits, so a failed
+   * run does not repeat; nothing runs while a step is running or edits are unsaved.
+   */
+  private scheduleAutoMap(): void {
+    clearTimeout(this.autoMapTimer)
+    const f = this.frac
+    if (!f?.rolesDirty) {
+      this.autoMapTried = false
+      return
+    }
+    if (this.autoMapTried || !f.competencies.length || !f.roles.some(r => r.activities.length)) {
+      return
+    }
+    this.autoMapTimer = setTimeout(() => {
+      if (this.frac?.rolesDirty && this.canRun && !this.autosave.hasUnsaved && !this.autoMapTried) {
+        this.autoMapTried = true
+        this.mapActivities(true)
+      } else if (this.frac?.rolesDirty && !this.autoMapTried) {
+        this.scheduleAutoMap()
+      }
+    }, FRAC_STUDIO_AUTO_MAP_MS)
   }
 
   /** Re-runs the step the footer offers, the same run as that tab's own button. */
@@ -623,12 +658,6 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
       ...(step === 'roles' ? { rolesDirty: false } : {}),
     })
     this.autosave.queueChecked(step)
-  }
-
-  /** The team re-checked the mappings by hand after editing roles. */
-  markMappingChecked(): void {
-    this.applyLocal({ rolesDirty: false })
-    this.autosave.queue('rolesDirty', false)
   }
 
   retrySave(): void {
@@ -712,6 +741,8 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
         this.feedback = { ...this.feedback, [job.kind]: '' }
       }
       this.historyKey++
+      // Edits made while a job ran get their own automatic mapping after the reload
+      this.autoMapTried = false
       this.load(false)
     }
   }
@@ -739,6 +770,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
   private setFrac(frac: Frac): void {
     this.frac = frac
     this.refreshDerived()
+    this.scheduleAutoMap()
   }
 
   private refreshDerived(): void {

@@ -235,7 +235,7 @@ export function fracProgress(frac: Frac, job: FracJob | null = null, briefDocs =
           ? `${plural(frac.roles.length, 'role')} · ${plural(s.activities, 'activity', 'activities')} copied from ${copiedFrom}`
           : `${plural(frac.roles.length, 'role')} · ${plural(s.activities, 'activity', 'activities')} · ${s.unmapped} unmapped`,
       howTo: frac.rolesDirty
-        ? 'Activities changed after they were mapped. Run "Map activities to competencies", or check the mappings and mark them checked.'
+        ? 'Activities changed after they were mapped. They are mapped to the competencies again automatically a few seconds after you stop editing.'
         : staleHowTo(frac, 'roles', 'these roles were built', 'Map activities to competencies again or revise the roles')
           || rolesHowTo(frac, briefDocs, copiedFrom),
       running: running(4),
