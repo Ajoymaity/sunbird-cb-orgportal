@@ -24,7 +24,7 @@
             "wat_member",
             "frac_admin",
             "frac_read",
-            "frac_ai_creator",
+            "frac_ai_admin",
             "playlist_admin",
             "playlist_read"
           ]
@@ -90,7 +90,7 @@
           "enabled": true,
           "routerLink": "/app/home/frac-studio",
           "requiredRoles": [
-            "frac_ai_creator"
+            "frac_ai_admin"
           ]
         },
         {

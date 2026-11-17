@@ -118,6 +118,16 @@ export interface FracReport {
   fingerprint?: string
 }
 
+/** What the last "Fix all findings" did; the next expert check confirms what is really fixed. */
+export interface FracLastFix {
+  at: string
+  total: number
+  fixed: number
+  skipped: { finding: string, reason: string }[]
+  /** What the fix changed (missing on older runs). */
+  changes?: { activities: number, competencies: number, added: number, ladders: number }
+}
+
 export interface Frac {
   id: string
   createdAt: string
@@ -148,6 +158,8 @@ export interface Frac {
   reviewStale?: boolean
   /** The agent's last "Check roles against the job description" on the Roles tab; out of date when changedAt.roles is later. */
   rolesCheck?: FracRolesCheck
+  /** The last "Fix all findings" run: how many findings it acted on and what the agent skipped. */
+  lastFix?: FracLastFix
   /**
    * Set by the service: when each step's content last changed (an edit, an AI run, a sheet upload) or was marked
    * checked. A step with output needs attention when an earlier step changed after it. Missing on older FRACs.

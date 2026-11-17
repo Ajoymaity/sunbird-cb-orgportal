@@ -57,6 +57,6 @@ import { ReviewerComponent } from './pages/reviewer/reviewer.component'
     HideForViewOnlyDirective,
     DisableForViewOnlyDirective,
   ],
-  // No FEATURE_KEY: FRAC Studio has one role, FRAC_AI_CREATOR, which may do everything, so nothing is view-only
+  // No FEATURE_KEY: FRAC Studio has one role, FRAC_AI_ADMIN, which may do everything, so nothing is view-only
 })
 export class FracStudioModule { }

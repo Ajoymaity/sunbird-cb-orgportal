@@ -39,6 +39,23 @@
   font-size: $v2-font-micro;
 }
 
+.row-actions {
+  white-space: nowrap;
+
+  .link + .link { margin-left: 12px; }
+}
+
+.confirm-text {
+  margin-right: 12px;
+  color: $v2-color-text-secondary;
+  font-size: $v2-font-caption;
+  white-space: normal;
+}
+
+.link.danger { color: $v2-status-danger-text; }
+
+.link:disabled { opacity: 0.5; cursor: default; }
+
 .link {
   border: 0;
   background: none;

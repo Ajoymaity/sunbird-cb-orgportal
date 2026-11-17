@@ -4,7 +4,7 @@ import { Observable, of, Subject, Subscription } from 'rxjs'
 import { catchError, debounceTime, switchMap } from 'rxjs/operators'
 import { FracUploadItem } from '../../components/document-upload/document-upload.component'
 import {
-  FRAC_STUDIO_FEEDBACK_MAX_CHARS,
+  FRAC_STUDIO_AUTO_MAP_MS,
   FRAC_STUDIO_LADDER_FIX_USD,
   FRAC_STUDIO_RERUN_COST,
   FRAC_STUDIO_STATES,
@@ -29,17 +29,19 @@ import { FracStudioApiService } from '../../services/frac-studio-api.service'
 import { FracStudioAutosaveService } from '../../services/frac-studio-autosave.service'
 import { apiErrorMessage, runningJobId, saveBlob } from '../../utils/frac-studio-download.util'
 import { emptyResearch } from '../../utils/frac-studio-edit.util'
-import { copiedRoles, curStep, FRAC_STEP_TITLES, fracProgress, FracStepProgress, staleSteps } from '../../utils/frac-studio-progress.util'
+import {
+  changedBefore, copiedRoles, curStep, FRAC_STEP_TITLES, fracProgress, FracStepProgress, staleSteps,
+} from '../../utils/frac-studio-progress.util'
 import { dominantPrefix, normalizeCode, usedByMap } from '../../utils/frac-studio-refs.util'
 import { reapplyWhat } from '../../utils/frac-studio-sheet.util'
 
 export type CreatorTab = 'research' | 'roles' | 'competencies' | 'ladders' | 'check' | 'history'
 
-/** Primary action per curStep (spec 5 labels). Steps 2–5 run the AI step; "Re-derive" when roles changed. */
+/** Primary action per curStep (spec 5 labels): research, competencies, roles & activities, ladders, check, download. */
 const PRIMARY: { label: string, step: FracGenStep | null }[] = [
   { label: 'Research the job', step: 'research' },
-  { label: 'Build roles & activities', step: 'roles' },
   { label: 'Derive competencies', step: 'competencies' },
+  { label: 'Build roles & activities', step: 'roles' },
   { label: 'Write level ladders', step: 'ladders' },
   { label: 'Run expert check', step: null },
   { label: 'Download Excel', step: null },
@@ -61,8 +63,8 @@ const UPLOAD_FIRST_HINTS: Partial<Record<FracGenStep, string>> = {
 /** What a revise keeps and what it redoes, shown under each feedback box. */
 const REVISE_HINTS: Record<FracGenStep, string> = {
   research: 'Research is redone with your feedback, e.g. "Add the state\'s 104 helpline".',
-  roles: 'Roles and activities are redone with your feedback. Activities your team added are kept; '
-    + 'competency mappings are cleared until competencies are re-derived.',
+  roles: 'Roles and activities are redone with your feedback, and every activity is mapped to the competencies again. '
+    + 'Activities your team added are kept.',
   competencies: 'Competencies and mappings are redone with your feedback. Ladders are kept where a competency\'s code and label stay the same.',
   ladders: 'Feedback applies to "Rewrite all" and to "Revise" on a single competency.',
 }
@@ -105,9 +107,12 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
 
   frac: Frac | null = null
   steps: FracStepProgress[] = []
-  /** Steps an earlier change left out of date (competencies is covered by the rolesDirty banner while that is set). */
+  /** Steps an earlier change left out of date (roles is covered by the rolesDirty banner while that is set). */
   stale: Exclude<FracStep, 'brief'>[] = []
   readonly stepTitles = FRAC_STEP_TITLES
+  /** Pending automatic "Map activities to competencies" after activity edits, and whether this round already tried. */
+  private autoMapTimer?: ReturnType<typeof setTimeout>
+  private autoMapTried = false
   readonly states = FRAC_STUDIO_STATES
   /** The brief card's edit form while it is open. */
   briefDraft: { cadre: string, state: string, prompt: string } | null = null
@@ -171,6 +176,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    clearTimeout(this.autoMapTimer)
     this.subs.unsubscribe()
   }
 
@@ -187,14 +193,15 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     if (step === 4 && this.frac.review) {
       return { ...action, label: 'Re-run expert check' }
     }
+    // Activities changed after mapping: map them again (the competencies step maps only while they are current)
+    if (step === 2 && this.frac.rolesDirty && this.frac.roles.some(r => r.activities.length)) {
+      return { label: 'Map activities to competencies', step: 'competencies' }
+    }
     // Roles from a sheet or a matched position are kept: only empty roles get activities
-    if (step === 1 && this.frac.roles.length) {
+    if (step === 2 && this.frac.roles.length) {
       return { ...action, label: 'Write missing activities' }
     }
-    if (step === 2 && this.frac.uploads?.competencies) {
-      return { ...action, label: 'Map activities to your competencies' }
-    }
-    return action.step === 'competencies' && this.frac.rolesDirty ? { ...action, label: 'Re-derive competencies' } : action
+    return action
   }
 
   /**
@@ -446,6 +453,9 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
       // First the step's own tab, where its document or sheet can be uploaded (and research filled in by hand);
       // from there the same button runs the agent
       this.tab = action.step
+    } else if (action.step === 'competencies' && this.frac && curStep(this.frac, this.briefDocCount) === 2) {
+      // "Map activities to competencies" after activity edits: map again from the Roles tab
+      this.mapActivities()
     } else if (action.step) {
       this.runStep(action.step)
     } else if (this.frac && curStep(this.frac, this.briefDocCount) === 4) {
@@ -490,31 +500,14 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     this.runStep('ladders', this.withFeedback('ladders', { codes: [code] }))
   }
 
-  /** "Fix these competencies" (spec 5.6): rewrites the cited ladders with the finding as feedback. */
+  /**
+   * "Fix" on one finding: the same job as Fix all, limited to this finding (the agent edits activities
+   * and competencies, and rewrites the ladders it names). A version is saved first; the check then shows out of date.
+   */
   fixFinding(finding: FracFinding): void {
-    const codes = (this.frac?.competencies ?? []).map(c => c.code)
-      .filter(code => finding.refs.some(ref => normalizeCode(ref) === normalizeCode(code)))
-    if (codes.length) {
-      this.runStep('ladders', { codes, feedback: finding.fix ? `${finding.title}. ${finding.fix}` : finding.title })
+    if (this.canRun) {
+      this.startJob(this.api.fixAll(this.fracId, [finding.title]), 'The fix could not be started.')
     }
-  }
-
-  /** "Replace with …" on an outdated-name finding: the service swaps the name everywhere, then the check is out of date. */
-  replaceOutdatedName(finding: FracFinding): void {
-    if (!this.canRun) {
-      return
-    }
-    this.error = ''
-    this.subs.add(
-      this.api.replaceOutdated(this.fracId, finding.title).subscribe({
-        next: ({ frac }) => {
-          this.historyKey++
-          this.setFrac(frac)
-          this.quickRefresh.next()
-        },
-        error: err => this.error = apiErrorMessage(err, 'The name could not be replaced.'),
-      }),
-    )
   }
 
   /** Steps an upload or edit left out of date, in the order the flow builds them (each from the one before). */
@@ -524,8 +517,8 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     }
     const stale = new Set<string>(this.stale)
     const rolesDirty = this.frac.rolesDirty
-    return (['research', 'roles', 'competencies', 'ladders'] as const)
-      .filter(step => stale.has(step) || (step === 'competencies' && rolesDirty))
+    return (['research', 'competencies', 'roles', 'ladders'] as const)
+      .filter(step => stale.has(step) || (step === 'roles' && rolesDirty))
   }
 
   /**
@@ -552,7 +545,9 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     const sheet = !!this.frac.uploads?.competencies
     const labels: Record<FracGenStep, string> = {
       research: `Re-run research (about ${FRAC_STUDIO_RERUN_COST.research})`,
-      roles: `Rebuild roles & activities (about ${FRAC_STUDIO_RERUN_COST.roles})`,
+      roles: this.rolesNeedMapping
+        ? `Map activities to competencies (about ${FRAC_STUDIO_RERUN_COST.map})`
+        : `Rebuild roles & activities (about ${FRAC_STUDIO_RERUN_COST.roles})`,
       competencies: sheet
         ? `Map activities to your competencies (about ${FRAC_STUDIO_RERUN_COST.map})`
         : `Re-derive competencies (about ${FRAC_STUDIO_RERUN_COST.derive})`,
@@ -561,9 +556,57 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     return labels[step]
   }
 
+  /**
+   * The roles are out of date only because the competencies changed after them, or activities were edited after
+   * mapping: mapping them again is enough, no rebuild.
+   */
+  get rolesNeedMapping(): boolean {
+    return !!this.frac && (this.frac.rolesDirty || changedBefore(this.frac, 'roles') === 'competencies')
+  }
+
+  /**
+   * Maps every activity to the competencies again (the competencies step maps only while they are current). Runs by
+   * itself after activity edits (scheduleAutoMap); the footer can still offer it. `auto` leaves the open tab alone.
+   */
+  mapActivities(auto = false): void {
+    if (this.canRun) {
+      if (!auto) {
+        this.tab = 'roles'
+      }
+      this.startJob(this.api.runStep(this.fracId, 'competencies'), 'The mapping could not be started.')
+    }
+  }
+
+  /**
+   * Activities changed after mapping (rolesDirty): map them again automatically once the edits are saved and the team
+   * has paused for FRAC_STUDIO_AUTO_MAP_MS, instead of waiting for a button. One try per round of edits, so a failed
+   * run does not repeat; nothing runs while a step is running or edits are unsaved.
+   */
+  private scheduleAutoMap(): void {
+    clearTimeout(this.autoMapTimer)
+    const f = this.frac
+    if (!f?.rolesDirty) {
+      this.autoMapTried = false
+      return
+    }
+    if (this.autoMapTried || !f.competencies.length || !f.roles.some(r => r.activities.length)) {
+      return
+    }
+    this.autoMapTimer = setTimeout(() => {
+      if (this.frac?.rolesDirty && this.canRun && !this.autosave.hasUnsaved && !this.autoMapTried) {
+        this.autoMapTried = true
+        this.mapActivities(true)
+      } else if (this.frac?.rolesDirty && !this.autoMapTried) {
+        this.scheduleAutoMap()
+      }
+    }, FRAC_STUDIO_AUTO_MAP_MS)
+  }
+
   /** Re-runs the step the footer offers, the same run as that tab's own button. */
   rerun(step: FracGenStep): void {
-    if (step === 'ladders') {
+    if (step === 'roles' && this.rolesNeedMapping) {
+      this.mapActivities()
+    } else if (step === 'ladders') {
       this.rewriteAllLadders()
     } else {
       this.runStep(step)
@@ -571,21 +614,14 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * "Fix all" on the expert check: one ladders run for every competency the open findings name, with each finding
-   * as feedback ("ASHA2: title. fix"), cut to what the service accepts. The check then shows out of date.
+   * "Fix all findings" on the expert check: the service fixes every open finding in one job (outdated names, content
+   * edits by the agent, then ladders) after saving a version. The page follows the job, reloads the FRAC, and the
+   * check shows out of date so the team re-runs it.
    */
-  fixAllFindings(findings: FracFinding[]): void {
-    const all = (this.frac?.competencies ?? []).map(c => c.code)
-    const named = (finding: FracFinding) => all.filter(code => finding.refs.some(ref => normalizeCode(ref) === normalizeCode(code)))
-    const codes = all.filter(code => findings.some(f => named(f).includes(code)))
-    if (!codes.length) {
-      return
+  fixAllFindings(): void {
+    if (this.canRun) {
+      this.startJob(this.api.fixAll(this.fracId), 'Fix all findings could not be started.')
     }
-    const feedback = findings
-      .map(f => `${named(f).join(', ')}: ${f.title}.${f.fix ? ` ${f.fix}` : ''}`)
-      .join('\n')
-      .slice(0, FRAC_STUDIO_FEEDBACK_MAX_CHARS)
-    this.runStep('ladders', { codes, feedback })
   }
 
   onResearchChange(research: FracResearch): void {
@@ -619,15 +655,9 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     }
     this.applyLocal({
       changedAt: { ...this.frac.changedAt, [step]: new Date().toISOString() },
-      ...(step === 'competencies' ? { rolesDirty: false } : {}),
+      ...(step === 'roles' ? { rolesDirty: false } : {}),
     })
     this.autosave.queueChecked(step)
-  }
-
-  /** The team re-checked the mappings by hand after editing roles. */
-  markMappingChecked(): void {
-    this.applyLocal({ rolesDirty: false })
-    this.autosave.queue('rolesDirty', false)
   }
 
   retrySave(): void {
@@ -711,6 +741,8 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
         this.feedback = { ...this.feedback, [job.kind]: '' }
       }
       this.historyKey++
+      // Edits made while a job ran get their own automatic mapping after the reload
+      this.autoMapTried = false
       this.load(false)
     }
   }
@@ -738,6 +770,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
   private setFrac(frac: Frac): void {
     this.frac = frac
     this.refreshDerived()
+    this.scheduleAutoMap()
   }
 
   private refreshDerived(): void {
@@ -747,7 +780,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
       this.steps = fracProgress(this.frac, this.job, this.briefDocCount)
       const rolesDirty = this.frac.rolesDirty
       this.stale = staleSteps(this.frac)
-        .filter((step): step is Exclude<FracStep, 'brief'> => step !== 'brief' && !(rolesDirty && step === 'competencies'))
+        .filter((step): step is Exclude<FracStep, 'brief'> => step !== 'brief' && !(rolesDirty && step === 'roles'))
     }
   }
 

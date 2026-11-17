@@ -37,7 +37,7 @@ const API_END_POINTS = {
   TEMPLATE: (kind: FracDocumentKind) => `${FRAC_STUDIO_BASE}/templates/${kind}`,
   FRAC: (id: string) => `${FRAC_STUDIO_BASE}/fracs/${encodeURIComponent(id)}`,
   FRAC_STEP: (id: string, step: FracGenStep) => `${FRAC_STUDIO_BASE}/fracs/${encodeURIComponent(id)}/steps/${step}`,
-  FRAC_FIX_OUTDATED: (id: string) => `${FRAC_STUDIO_BASE}/fracs/${encodeURIComponent(id)}/fixes/outdated`,
+  FRAC_FIX_ALL: (id: string) => `${FRAC_STUDIO_BASE}/fracs/${encodeURIComponent(id)}/fixes/all`,
   FRAC_RULE_CHECKS: (id: string) => `${FRAC_STUDIO_BASE}/fracs/${encodeURIComponent(id)}/rule-checks`,
   FRAC_CHECK: (id: string) => `${FRAC_STUDIO_BASE}/fracs/${encodeURIComponent(id)}/steps/check`,
   FRAC_EXPORT: (id: string) => `${FRAC_STUDIO_BASE}/fracs/${encodeURIComponent(id)}/export.xlsx`,
@@ -96,9 +96,12 @@ export class FracStudioApiService {
     return this.http.post<{ frac: Frac }>(API_END_POINTS.FRAC_DOCUMENT_APPLY(id, documentId), {}).pipe(map(res => res.frac))
   }
 
-  /** "Replace with …" on an outdated-name finding: the service swaps the name everywhere (no AI) and saves a version first. */
-  replaceOutdated(id: string, title: string): Observable<{ frac: Frac, replaced: number }> {
-    return this.http.post<{ frac: Frac, replaced: number }>(API_END_POINTS.FRAC_FIX_OUTDATED(id), { title })
+  /**
+   * Fixes expert-check findings with the agent in one job: every open finding ("Fix all findings"), or only the ones
+   * whose titles are given ("Fix" on a finding). Resolves to the job id to poll.
+   */
+  fixAll(id: string, titles?: string[]): Observable<string> {
+    return this.http.post<{ jobId: string }>(API_END_POINTS.FRAC_FIX_ALL(id), titles?.length ? { titles } : {}).pipe(map(res => res.jobId))
   }
 
   /** Quick checks (Bloom's verbs, FRAC structure) on the FRAC as saved now; rule-based, no AI. */
@@ -114,6 +117,11 @@ export class FracStudioApiService {
   /** The template to fill in before uploading (an .xlsx, or a text guide for brief documents). */
   downloadTemplate(kind: FracDocumentKind): Observable<FracDownload> {
     return this.download(API_END_POINTS.TEMPLATE(kind), kind === 'brief' ? 'Job description guide.txt' : `${kind} template.xlsx`)
+  }
+
+  /** Deletes the FRAC with its versions and documents; its reviews stay. Refused while a step runs on it. */
+  deleteFrac(id: string): Observable<void> {
+    return this.http.delete<void>(API_END_POINTS.FRAC(id))
   }
 
   patchFrac(id: string, edits: FracEdits): Observable<Frac> {

@@ -194,3 +194,23 @@
   @include v2-btn-secondary;
   margin-top: $v2-space-1;
 }
+
+// What the last "Fix all findings" acted on and skipped, until the expert check is re-run
+.last-fix {
+  margin-bottom: $v2-space-2;
+  padding: 10px 12px;
+  border: 1px solid $v2-color-border;
+  border-radius: $v2-radius-input;
+  background: $v2-status-info-bg;
+  color: $v2-status-info-text;
+  font-size: $v2-font-label;
+}
+
+.last-fix-title { margin: 0; font-weight: 500; }
+
+.last-fix-changes { margin: 4px 0 0; }
+
+.last-fix-skipped {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}

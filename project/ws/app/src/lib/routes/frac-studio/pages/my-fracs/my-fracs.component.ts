@@ -26,6 +26,11 @@ export class MyFracsComponent implements OnInit, OnDestroy {
   reviews: FracReviewSummary[] = []
   loading = true
   error = ''
+  /** The FRAC whose Delete is waiting for its inline confirm. */
+  confirmDelete: string | null = null
+  deleting = false
+  /** Why the last delete failed; shown above the list, which stays on screen. */
+  deleteError = ''
   readonly fracSort = new TableSort<FracSummary>((f, key) => (key === 'activities' ? f.counts.activities : summaryValue(f, key)))
   readonly reviewSort = new TableSort<FracReviewSummary>(summaryValue)
 
@@ -69,8 +74,24 @@ export class MyFracsComponent implements OnInit, OnDestroy {
     this.router.navigate([FRAC_STUDIO_ROUTES.reviewer], { queryParams: { review: id } })
   }
 
-  createNew(): void {
-    this.router.navigateByUrl(FRAC_STUDIO_ROUTES.creator)
+  /** Deletes a FRAC after the inline confirm; its reviews stay in the list below. */
+  deleteFrac(id: string): void {
+    this.deleting = true
+    this.deleteError = ''
+    this.subs.add(
+      this.api.deleteFrac(id).subscribe({
+        next: () => {
+          this.fracs = this.fracs.filter(f => f.id !== id)
+          this.confirmDelete = null
+          this.deleting = false
+        },
+        error: err => {
+          this.deleteError = apiErrorMessage(err, 'The FRAC could not be deleted.')
+          this.confirmDelete = null
+          this.deleting = false
+        },
+      }),
+    )
   }
 
   trackByRowId(_index: number, row: SortedRow<{ id: string }>): string {

@@ -16,7 +16,7 @@
       </ul>
       <details class="checks" *ngIf="item.checks?.length" open>
         <summary>The expert check's rules found {{ item.checks?.length }} {{ item.checks?.length === 1 ? 'thing' : 'things' }}
-          to fix in this sheet (checked at upload, no AI)</summary>
+          to fix in this sheet (checked at upload)</summary>
         <ul>
           <li *ngFor="let c of item.checks">
             <span class="sev" [class.blocker]="c.sev === 'B'" [class.major]="c.sev === 'M'">{{ severity(c) }}</span>
