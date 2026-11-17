@@ -84,14 +84,20 @@ const routes: Routes = [
         loadChildren: () => import('../playlist/playlist.routes').then(m => m.HOME_PLAYLIST_ROUTES),
       },
       {
+        // Role names MUST be lowercase (see general.guard.ts). The Form module needs FORM_ADMIN.
         path: 'form',
         loadChildren: () =>
           import('../form/form.module').then((m) => m.FormModule),
+        canActivate: [GeneralGuard],
+        data: { requiredRoles: ['form_admin'] },
       },
       {
+        // The Organization section needs ORG_ADMIN.
         path: 'organization',
         loadChildren: () =>
           import('../organization/organization.module').then((m) => m.OrganizationModule),
+        canActivate: [GeneralGuard],
+        data: { requiredRoles: ['org_admin'] },
       },
       {
         path: 'frac',

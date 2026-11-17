@@ -10,6 +10,8 @@ const DEFAULT_REQUIRED_ROLES: string[] = [
   'PLAYLIST_ADMIN',
   'PLAYLIST_READ',
   'MNC_REPORT_VIEWER',
+  'FORM_ADMIN',
+  'ORG_ADMIN',
 ]
 
 type EnvMap = { [key: string]: any }

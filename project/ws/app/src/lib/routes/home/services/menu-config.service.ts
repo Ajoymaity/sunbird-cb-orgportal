@@ -67,7 +67,7 @@ export class MenuConfigService {
             },
             enabled: true,
             routerLink: '/app/home/form/config',
-            requiredRoles: [],
+            requiredRoles: ['form_admin'],
         },
         {
             name: 'Organization',
@@ -80,7 +80,7 @@ export class MenuConfigService {
             },
             enabled: true,
             routerLink: '/app/home/organization/list',
-            requiredRoles: [],
+            requiredRoles: ['org_admin'],
         },
     ]
 
