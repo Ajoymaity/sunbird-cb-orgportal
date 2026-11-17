@@ -94,10 +94,6 @@ export class MyFracsComponent implements OnInit, OnDestroy {
     )
   }
 
-  createNew(): void {
-    this.router.navigateByUrl(FRAC_STUDIO_ROUTES.creator)
-  }
-
   trackByRowId(_index: number, row: SortedRow<{ id: string }>): string {
     return row.item.id
   }

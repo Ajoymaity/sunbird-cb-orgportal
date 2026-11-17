@@ -8,7 +8,7 @@ const DEFAULT_REQUIRED_ROLES: string[] = [
   'FRAC_ADMIN',
   'FRAC_READ',
   // FRAC Studio's own role (16 Nov 2026); without it here a user holding only this role is logged out at bootstrap
-  'FRAC_AI_CREATOR',
+  'FRAC_AI_ADMIN',
   'PLAYLIST_ADMIN',
   'PLAYLIST_READ',
   'MNC_REPORT_VIEWER',

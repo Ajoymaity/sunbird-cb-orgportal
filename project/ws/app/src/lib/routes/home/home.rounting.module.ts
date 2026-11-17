@@ -89,12 +89,12 @@ const routes: Routes = [
           import('../frac/frac.module').then((m) => m.FracModule),
       },
       {
-        // Role names MUST be lowercase (see general.guard.ts). FRAC Studio has its own role, FRAC_AI_CREATOR.
+        // Role names MUST be lowercase (see general.guard.ts). FRAC Studio has its own role, FRAC_AI_ADMIN.
         path: 'frac-studio',
         loadChildren: () =>
           import('../frac-studio/frac-studio.module').then((m) => m.FracStudioModule),
         canActivate: [GeneralGuard],
-        data: { requiredRoles: ['frac_ai_creator'] },
+        data: { requiredRoles: ['frac_ai_admin'] },
       },
       {
         // Role name MUST be lowercase — GeneralGuard tests a lowercased Set without
