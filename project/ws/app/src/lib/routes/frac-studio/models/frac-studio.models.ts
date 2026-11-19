@@ -119,6 +119,21 @@ export interface FracReport {
 }
 
 /** What the last "Fix all findings" did; the next expert check confirms what is really fixed. */
+/** What the feedback agent did on the last run with feedback or instructions (it reads the feedback first). */
+export interface FracFeedbackResult {
+  at: string
+  step: FracGenStep
+  summary: string
+  /** What changed, e.g. "5 competencies (ASHA1, …) from Competencies.xlsx". */
+  applied: string[]
+  /** Points the agent could not carry out, with the reason. */
+  notApplied: { point: string, reason: string }[]
+  /** Caveats about what was done, e.g. a document that does not fit the cadre. Missing on older runs. */
+  notes?: string[]
+  /** False when the feedback was carried out and the step itself did not need to run. */
+  stepRan: boolean
+}
+
 export interface FracLastFix {
   at: string
   total: number
@@ -146,7 +161,7 @@ export interface Frac {
   /** The earlier FRAC or Positions entry this FRAC started from (position matching). */
   seededFrom?: FracSeed
   /** Standard sheets in use, by kind, with the file name; that step uses the sheet instead of the AI. */
-  uploads?: Partial<Record<FracSheetKind, string>>
+  uploads?: Partial<Record<FracSheetKind | 'dictionary', string>>
   codePrefix: string
   postings: FracPosting[]
   research: FracResearch | null
@@ -160,6 +175,8 @@ export interface Frac {
   rolesCheck?: FracRolesCheck
   /** The last "Fix all findings" run: how many findings it acted on and what the agent skipped. */
   lastFix?: FracLastFix
+  /** The last run with feedback or instructions: what the feedback agent changed and what it could not. */
+  lastFeedback?: FracFeedbackResult
   /**
    * Set by the service: when each step's content last changed (an edit, an AI run, a sheet upload) or was marked
    * checked. A step with output needs attention when an earlier step changed after it. Missing on older FRACs.
@@ -187,7 +204,8 @@ export interface FracSummary {
 /** Standard sheets a team can upload in place of an AI step. */
 export type FracSheetKind = 'roles' | 'competencies' | 'sources'
 /** "brief": a job description or government order for research. */
-export type FracDocumentKind = 'brief' | FracSheetKind
+/** "dictionary": a whole existing FRAC in one workbook (roles, activities, mappings, competencies, ladders, sources). */
+export type FracDocumentKind = 'brief' | 'dictionary' | FracSheetKind
 
 export interface FracSeed {
   from: 'frac' | 'positions'
@@ -341,7 +359,10 @@ export type FracGenStep = 'research' | 'roles' | 'competencies' | 'ladders'
 
 /** Revise feedback for a step; ladders can be limited to some competency codes. */
 export interface FracStepBody {
+  /** Revise feedback (the Revise button): the step may redo its output to follow it. */
   feedback?: string
+  /** Instructions typed before a run: every AI call follows them; uploaded sheets and documents are still used. */
+  guidance?: string
   codes?: string[]
 }
 

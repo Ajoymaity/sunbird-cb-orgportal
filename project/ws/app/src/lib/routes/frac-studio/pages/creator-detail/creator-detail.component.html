@@ -76,14 +76,29 @@
 
     <ws-app-frac-job-progress [job]="job"></ws-app-frac-job-progress>
 
-    <!-- Revise with feedback (spec 5): one box per AI step, shown on that step's tab once it has output -->
+    <!-- Feedback for the AI: on every AI step's tab and the Expert check. Before a step has run it holds instructions for
+         that run; afterwards it also offers Revise (spec 5). Fix and Fix all follow the Expert check's box. -->
     <ng-container *appHideForViewOnly>
-      <section class="revise" *ngIf="reviseStep as step">
-        <label class="revise-label" [for]="'revise-' + step">Feedback for the AI</label>
-        <textarea class="revise-input" [id]="'revise-' + step" rows="2" [(ngModel)]="feedback[step]"
-          placeholder="What should change?" [disabled]="running"></textarea>
-        <p class="hint">{{ reviseHints[step] }}</p>
-        <div class="actions">
+      <section class="revise" *ngIf="feedbackTab as box">
+        <label class="revise-label" [for]="'revise-' + box">
+          {{ box === 'check' ? 'Instructions for the fixes' : reviseStep ? 'Feedback for the AI' : 'Instructions for the AI' }}
+        </label>
+        <textarea class="revise-input" [id]="'revise-' + box" rows="2" [(ngModel)]="feedback[box]"
+          [placeholder]="reviseStep ? 'What should change?' : 'What should the AI follow?'" [disabled]="running"></textarea>
+        <p class="hint">{{ reviseStep ? reviseHints[reviseStep] : guideHints[box] }}</p>
+        <!-- What the agent did with the last feedback on this tab -->
+        <div class="feedback-result" *ngIf="frac?.lastFeedback as fb" [hidden]="fb.step !== box" role="status">
+          <p class="feedback-result-title">From your feedback{{ fb.summary ? ': ' + fb.summary : '' }}</p>
+          <ul *ngIf="fb.applied.length"><li *ngFor="let a of fb.applied">{{ a }}</li></ul>
+          <p *ngIf="!fb.applied.length">Nothing was taken from the documents; the step followed your feedback.</p>
+          <ul class="not-applied" *ngIf="fb.notApplied.length">
+            <li *ngFor="let n of fb.notApplied">Not done: {{ n.point }}. {{ n.reason }}</li>
+          </ul>
+          <ul class="feedback-notes" *ngIf="fb.notes?.length">
+            <li *ngFor="let n of fb.notes">Note: {{ n }}</li>
+          </ul>
+        </div>
+        <div class="actions" *ngIf="reviseStep as step">
           <ng-container *ngIf="step === 'ladders'; else reviseOne">
             <button type="button" class="btn-secondary" (click)="writeMissingLadders()" [disabled]="!canRun || !missingLadders">
               Write missing ladders ({{ missingLadders }})
@@ -102,6 +117,12 @@
     <section class="panel" [ngSwitch]="tab">
       <ng-container *ngSwitchCase="'research'">
         <div class="uploads">
+          <ws-app-frac-document-upload kind="dictionary" title="Existing FRAC dictionary"
+            hint="Already have a FRAC? Upload it (.xlsx, e.g. a FRAC Studio download). Its roles, activities, competencies and ladders are used as they are, and FRAC Studio updates it."
+            [items]="docItems('dictionary')" [disabled]="!canRun" [busy]="uploading === 'dictionary'" [inUse]="dictionaryInUse"
+            [reapplyWhat]="reapplyWhatFor('dictionary')" (reapply)="reapplyDocument('dictionary', $event)"
+            (pick)="uploadDocument('dictionary', $event)" (remove)="removeDocument($event)" (template)="downloadTemplate('dictionary')">
+          </ws-app-frac-document-upload>
           <ws-app-frac-document-upload *ngIf="briefDocumentsOpen" kind="brief" title="Job description or government order"
             hint="PDF, Word (.docx) or text. Research reads these first and searches the web less."
             [items]="docItems('brief')" [max]="3" [disabled]="!canRun" [busy]="uploading === 'brief'"

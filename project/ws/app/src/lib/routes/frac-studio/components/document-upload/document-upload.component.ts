@@ -17,14 +17,16 @@ const SEVERITY_LABELS: Record<FracSheetCheck['sev'], string> = { B: 'Blocker', M
 /** File types per kind; the service checks the same extensions. */
 const ACCEPT: Record<FracDocumentKind, string> = {
   brief: '.pdf,.docx,.txt,.md',
+  dictionary: '.xlsx',
   roles: '.xlsx,.csv',
   competencies: '.xlsx,.csv',
   sources: '.xlsx,.csv',
 }
 
 /**
- * An upload slot (review decisions, Nov 2026): a job description / government order for research, or a
- * standard Roles, Competencies or Sources sheet that a step then uses instead of the AI. Shows what is attached,
+ * An upload slot (review decisions, Nov 2026): a job description / government order for research, a
+ * standard Roles, Competencies or Sources sheet that a step then uses instead of the AI, or a FRAC dictionary (a whole
+ * existing FRAC) that the steps then update. Shows what is attached,
  * a "Download template" link and the upload button; the page does the API calls.
  */
 @Component({
@@ -72,15 +74,21 @@ export class DocumentUploadComponent {
     if (this.busy) {
       return 'Uploading…'
     }
-    return this.kind === 'brief' ? 'Add document' : this.items.length ? 'Replace sheet' : 'Upload sheet'
+    if (this.kind === 'brief') {
+      return 'Add document'
+    }
+    const what = this.kind === 'dictionary' ? 'dictionary' : 'sheet'
+    return this.items.length ? `Replace ${what}` : `Upload ${what}`
   }
 
   onFile(input: HTMLInputElement): void {
     const file = input.files?.[0]
     input.value = ''
-    if (file) {
-      this.pick.emit(file)
+    if (!file) {
+      return
     }
+    // Sent at once, as every slot does: the service saves it, so it stays when the tab changes
+    this.pick.emit(file)
   }
 
   onReapply(): void {

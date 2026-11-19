@@ -154,6 +154,21 @@
 
 .revise-label { @include v2-form-label; margin: 0; }
 
+.feedback-result {
+  padding: 8px 12px;
+  border: 1px solid $v2-color-border;
+  border-radius: $v2-radius-card;
+  background: #ffffff;
+  font-size: 13px;
+
+  p { margin: 0; }
+  ul { margin: 4px 0 0; padding-left: 18px; }
+  .not-applied { color: $v2-status-warning-text; }
+  .feedback-notes { color: $v2-color-card-description; }
+}
+
+.feedback-result-title { font-weight: 500; }
+
 .revise-input {
   @include v2-input-field;
   height: auto;

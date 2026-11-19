@@ -57,21 +57,41 @@ const UPLOAD_FIRST: readonly FracGenStep[] = ['research']
 
 /** Shown beside the primary button on those tabs while nothing is uploaded there. */
 const UPLOAD_FIRST_HINTS: Partial<Record<FracGenStep, string>> = {
-  research: 'Have a job description, sources sheet or competency sheet? Upload it above. Otherwise the agent researches the job.',
+  research: 'Have an existing FRAC, a job description, sources sheet or competency sheet? Upload it above. '
+    + 'Otherwise the agent researches the job.',
+}
+
+/** A tab with a feedback box: each AI step's tab, and the Expert check (its Fix buttons follow it). */
+type FeedbackTab = FracGenStep | 'check'
+
+/** Shown under the box before the step has run: the text steers the first run. */
+const GUIDE_HINTS: Record<FeedbackTab, string> = {
+  research: 'Optional. Read first, before anything else, e.g. "Only competencies ASHA1–ASHA5 and only the roles from the dictionary". '
+    + 'The agent can pick competencies and roles from the uploaded documents and map them.',
+  competencies: 'Optional. Read first, e.g. "Use only ASHA1–ASHA5 from the sheet" or "Include a digital literacy competency". '
+    + 'The agent can pick competencies from the uploaded documents.',
+  roles: 'Optional. Read first, e.g. "Take only the roles from the dictionary" or "Keep activities to one line". '
+    + 'The agent can pick roles from the uploaded documents and map them.',
+  ladders: 'Optional. Read first, e.g. "Level 5 includes mentoring".',
+  check: 'Optional. Fix and Fix all follow these instructions, e.g. "Keep activity wording short". The check itself does not see them.',
 }
 
 /** What a revise keeps and what it redoes, shown under each feedback box. */
 const REVISE_HINTS: Record<FracGenStep, string> = {
-  research: 'Research is redone with your feedback, e.g. "Add the state\'s 104 helpline".',
-  roles: 'Roles and activities are redone with your feedback, and every activity is mapped to the competencies again. '
-    + 'Activities your team added are kept.',
-  competencies: 'Competencies and mappings are redone with your feedback. Ladders are kept where a competency\'s code and label stay the same.',
+  research: 'Your feedback is read first. It can pick competencies and roles from the uploaded documents and map them; '
+    + 'research is redone only for what is left, e.g. "Add the state\'s 104 helpline".',
+  roles: 'Your feedback is read first: it can take roles from the uploaded documents and map them. Otherwise roles and activities '
+    + 'are redone with it, every activity is mapped again, and activities your team added are kept.',
+  competencies: 'Your feedback is read first: it can pick competencies from the uploaded documents. Otherwise competencies and mappings '
+    + 'are redone with it; ladders are kept where a competency\'s code and label stay the same.',
   ladders: 'Feedback applies to "Rewrite all" and to "Revise" on a single competency.',
 }
 
 /** What an attached standard sheet changes, shown under its upload slot. */
 const IN_USE: Record<FracDocumentKind, string> = {
   brief: '',
+  dictionary: 'FRAC Studio keeps this FRAC: its roles, mappings and ladders. Steps only fill what is missing; '
+    + 'research, the expert check and Fix all update it.',
   roles: 'The Roles step keeps these roles and only writes activities for roles that have none.',
   competencies: 'The roles step maps each activity to these competencies; ladders in the sheet are kept, so only missing ones are written.',
   sources: 'Research uses these sources and does not search the web.',
@@ -104,6 +124,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     { key: 'history', label: 'History' },
   ]
   readonly reviseHints = REVISE_HINTS
+  readonly guideHints = GUIDE_HINTS
 
   frac: Frac | null = null
   steps: FracStepProgress[] = []
@@ -128,8 +149,11 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
   starting = false
   saveStatus: FracSaveStatus = 'idle'
   historyKey = 0
-  /** Revise feedback typed per step. */
-  feedback: Record<FracGenStep, string> = { research: '', roles: '', competencies: '', ladders: '' }
+  /** The Roles box text sent with a mapping run, cleared from that box when the run finishes. */
+  private mappingSentRoles = false
+
+  /** Text typed in each tab's feedback box: instructions for the next run, or feedback for Revise. */
+  feedback: Record<FeedbackTab, string> = { research: '', roles: '', competencies: '', ladders: '', check: '' }
   loading = true
   error = ''
   /** Documents attached to this FRAC: brief documents for research, and the standard sheets in use. */
@@ -222,7 +246,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     if (!this.frac || this.running || !step || step !== this.tab || !UPLOAD_FIRST.includes(step)) {
       return ''
     }
-    const kinds: FracDocumentKind[] = step === 'research' ? ['brief', 'sources', 'competencies'] : [step as FracDocumentKind]
+    const kinds: FracDocumentKind[] = step === 'research' ? ['brief', 'dictionary', 'sources', 'competencies'] : [step as FracDocumentKind]
     return kinds.some(kind => this.docItems(kind).length) ? '' : UPLOAD_FIRST_HINTS[step] ?? ''
   }
 
@@ -255,6 +279,14 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
   }
 
   /** The AI step behind the open tab, once it has output to revise (ladders: once competencies exist). */
+  /** The open tab's feedback box: every AI step's tab, and the Expert check once it has findings to fix. */
+  get feedbackTab(): FeedbackTab | null {
+    if (GEN_STEPS.includes(this.tab as FracGenStep)) {
+      return this.tab as FracGenStep
+    }
+    return this.tab === 'check' && this.frac?.review ? 'check' : null
+  }
+
   get reviseStep(): FracGenStep | null {
     const f = this.frac
     if (!f || !GEN_STEPS.includes(this.tab as FracGenStep)) {
@@ -359,7 +391,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
       this.api.uploadDocument(this.fracId, kind, file).subscribe({
         next: ({ document, frac }) => {
           this.uploading = null
-          // A new sheet replaces the older one of its kind; brief documents add up
+          // A new sheet replaces the older one of its kind (a dictionary included); brief documents add up
           this.documents = [...this.documents.filter(d => kind === 'brief' || d.kind !== kind), document]
           this.historyKey++
           this.setFrac(frac)
@@ -394,6 +426,16 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
   }
 
   /** What re-applying this kind of sheet puts back when its content was changed after the upload; '' hides the control. */
+  /** Asked before a FRAC dictionary upload replaces content already on the FRAC; '' on an empty FRAC. */
+  /**
+   * Under the dictionary slot: what it does while the FRAC was last built from it. After a later Roles or Competencies
+   * sheet it stays listed (feedback can still pick from it) without the note.
+   */
+  get dictionaryInUse(): string {
+    const name = this.docItems('dictionary')[0]?.name
+    return name && this.frac?.uploads?.dictionary === name ? IN_USE.dictionary : ''
+  }
+
   reapplyWhatFor(kind: FracDocumentKind): string {
     return this.frac ? reapplyWhat(this.frac, this.documents.find(d => d.kind === kind)) : ''
   }
@@ -506,7 +548,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
    */
   fixFinding(finding: FracFinding): void {
     if (this.canRun) {
-      this.startJob(this.api.fixAll(this.fracId, [finding.title]), 'The fix could not be started.')
+      this.startJob(this.api.fixAll(this.fracId, [finding.title], this.feedback.check.trim() || undefined), 'The fix could not be started.')
     }
   }
 
@@ -573,7 +615,10 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
       if (!auto) {
         this.tab = 'roles'
       }
-      this.startJob(this.api.runStep(this.fracId, 'competencies'), 'The mapping could not be started.')
+      // Clicked from the Roles tab: the text in its box goes along as the team's instructions (not on the automatic run)
+      const guidance = auto ? '' : this.feedback.roles.trim()
+      this.mappingSentRoles = !!guidance
+      this.startJob(this.api.runStep(this.fracId, 'competencies', guidance ? { guidance } : {}), 'The mapping could not be started.')
     }
   }
 
@@ -620,7 +665,7 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
    */
   fixAllFindings(): void {
     if (this.canRun) {
-      this.startJob(this.api.fixAll(this.fracId), 'Fix all findings could not be started.')
+      this.startJob(this.api.fixAll(this.fracId, undefined, this.feedback.check.trim() || undefined), 'Fix all findings could not be started.')
     }
   }
 
@@ -695,11 +740,16 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     )
   }
 
-  /** Runs an AI step on the saved FRAC and opens its tab to watch the progress. */
+  /**
+   * Runs an AI step on the saved FRAC and opens its tab to watch the progress. Text in the step's box goes along as
+   * instructions, unless the run already carries it as revise feedback.
+   */
   runStep(step: FracGenStep, body: FracStepBody = {}): void {
     if (this.canRun) {
+      const guidance = this.feedback[step].trim()
+      const sent = guidance && !body.feedback ? { ...body, guidance } : body
       this.tab = step
-      this.startJob(this.api.runStep(this.fracId, step, body), 'The step could not be started.')
+      this.startJob(this.api.runStep(this.fracId, step, sent), 'The step could not be started.')
     }
   }
 
@@ -739,6 +789,12 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
     if (job.status === 'done') {
       if (GEN_STEPS.includes(job.kind as FracGenStep)) {
         this.feedback = { ...this.feedback, [job.kind]: '' }
+        if (job.kind === 'competencies' && this.mappingSentRoles) {
+          this.feedback = { ...this.feedback, roles: '' }
+          this.mappingSentRoles = false
+        }
+      } else if (job.kind === 'fix-all') {
+        this.feedback = { ...this.feedback, check: '' }
       }
       this.historyKey++
       // Edits made while a job ran get their own automatic mapping after the reload
