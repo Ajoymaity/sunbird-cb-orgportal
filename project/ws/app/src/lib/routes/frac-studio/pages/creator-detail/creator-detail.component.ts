@@ -391,13 +391,8 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
       this.api.uploadDocument(this.fracId, kind, file).subscribe({
         next: ({ document, frac }) => {
           this.uploading = null
-          // A new sheet replaces the older one of its kind; brief documents add up. A dictionary also replaces the
-          // Roles, Competencies and Sources sheets, so the list comes from the service
-          if (kind === 'dictionary') {
-            this.loadDocuments()
-          } else {
-            this.documents = [...this.documents.filter(d => kind === 'brief' || d.kind !== kind), document]
-          }
+          // A new sheet replaces the older one of its kind (a dictionary included); brief documents add up
+          this.documents = [...this.documents.filter(d => kind === 'brief' || d.kind !== kind), document]
           this.historyKey++
           this.setFrac(frac)
           this.quickRefresh.next()
@@ -432,13 +427,13 @@ export class CreatorDetailComponent implements OnInit, OnDestroy {
 
   /** What re-applying this kind of sheet puts back when its content was changed after the upload; '' hides the control. */
   /** Asked before a FRAC dictionary upload replaces content already on the FRAC; '' on an empty FRAC. */
-  get dictionaryConfirm(): string {
-    const f = this.frac
-    if (!f || (!f.roles.length && !f.competencies.length)) {
-      return ''
-    }
-    return `This replaces the ${f.roles.length} roles and ${f.competencies.length} competencies here with the dictionary's. `
-      + 'A version is saved first, so you can undo it from History.'
+  /**
+   * Under the dictionary slot: what it does while the FRAC was last built from it. After a later Roles or Competencies
+   * sheet it stays listed (feedback can still pick from it) without the note.
+   */
+  get dictionaryInUse(): string {
+    const name = this.docItems('dictionary')[0]?.name
+    return name && this.frac?.uploads?.dictionary === name ? IN_USE.dictionary : ''
   }
 
   reapplyWhatFor(kind: FracDocumentKind): string {

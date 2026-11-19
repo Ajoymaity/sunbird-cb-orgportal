@@ -119,8 +119,8 @@
         <div class="uploads">
           <ws-app-frac-document-upload kind="dictionary" title="Existing FRAC dictionary"
             hint="Already have a FRAC? Upload it (.xlsx, e.g. a FRAC Studio download). Its roles, activities, competencies and ladders are used as they are, and FRAC Studio updates it."
-            [items]="docItems('dictionary')" [disabled]="!canRun" [busy]="uploading === 'dictionary'" [inUse]="inUse.dictionary"
-            [confirmBefore]="dictionaryConfirm" [reapplyWhat]="reapplyWhatFor('dictionary')" (reapply)="reapplyDocument('dictionary', $event)"
+            [items]="docItems('dictionary')" [disabled]="!canRun" [busy]="uploading === 'dictionary'" [inUse]="dictionaryInUse"
+            [reapplyWhat]="reapplyWhatFor('dictionary')" (reapply)="reapplyDocument('dictionary', $event)"
             (pick)="uploadDocument('dictionary', $event)" (remove)="removeDocument($event)" (template)="downloadTemplate('dictionary')">
           </ws-app-frac-document-upload>
           <ws-app-frac-document-upload *ngIf="briefDocumentsOpen" kind="brief" title="Job description or government order"

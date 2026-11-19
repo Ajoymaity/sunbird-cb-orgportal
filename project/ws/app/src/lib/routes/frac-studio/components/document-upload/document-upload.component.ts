@@ -53,8 +53,6 @@ export class DocumentUploadComponent {
    * the sheet's rows are stored; '' hides the Re-apply control.
    */
   @Input() reapplyWhat = ''
-  /** Asked before an upload is sent, e.g. what a FRAC dictionary replaces; '' uploads straight away. */
-  @Input() confirmBefore = ''
 
   @Output() readonly pick = new EventEmitter<File>()
   @Output() readonly remove = new EventEmitter<string>()
@@ -63,8 +61,6 @@ export class DocumentUploadComponent {
   @Output() readonly reapply = new EventEmitter<string>()
 
   confirmReapply = false
-  /** A picked file waiting for the team to confirm `confirmBefore`. */
-  pending: File | null = null
 
   get accept(): string {
     return ACCEPT[this.kind]
@@ -91,18 +87,8 @@ export class DocumentUploadComponent {
     if (!file) {
       return
     }
-    if (this.confirmBefore) {
-      this.pending = file
-    } else {
-      this.pick.emit(file)
-    }
-  }
-
-  confirmUpload(): void {
-    if (this.pending) {
-      this.pick.emit(this.pending)
-      this.pending = null
-    }
+    // Sent at once, as every slot does: the service saves it, so it stays when the tab changes
+    this.pick.emit(file)
   }
 
   onReapply(): void {
