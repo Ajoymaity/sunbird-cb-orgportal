@@ -100,8 +100,9 @@ export class FracStudioApiService {
    * Fixes expert-check findings with the agent in one job: every open finding ("Fix all findings"), or only the ones
    * whose titles are given ("Fix" on a finding). Resolves to the job id to poll.
    */
-  fixAll(id: string, titles?: string[]): Observable<string> {
-    return this.http.post<{ jobId: string }>(API_END_POINTS.FRAC_FIX_ALL(id), titles?.length ? { titles } : {}).pipe(map(res => res.jobId))
+  fixAll(id: string, titles?: string[], guidance?: string): Observable<string> {
+    const body = { ...(titles?.length ? { titles } : {}), ...(guidance ? { guidance } : {}) }
+    return this.http.post<{ jobId: string }>(API_END_POINTS.FRAC_FIX_ALL(id), body).pipe(map(res => res.jobId))
   }
 
   /** Quick checks (Bloom's verbs, FRAC structure) on the FRAC as saved now; rule-based, no AI. */

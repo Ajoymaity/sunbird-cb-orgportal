@@ -42,6 +42,14 @@
     </ng-container>
   </div>
 
+  <div class="edited" *ngIf="pending" role="alert">
+    <span>{{ confirmBefore }}</span>
+    <ng-container *appHideForViewOnly>
+      <button type="button" class="btn-secondary small" (click)="confirmUpload()" [disabled]="disabled || busy">Upload {{ pending.name }}</button>
+      <button type="button" class="text-btn" (click)="pending = null">Cancel</button>
+    </ng-container>
+  </div>
+
   <div class="upload-actions" *appHideForViewOnly>
     <label class="btn-secondary" [class.is-disabled]="disabled || busy || full">
       <input type="file" class="sr-only" #fileInput [accept]="accept" [disabled]="disabled || busy || full"

@@ -31,6 +31,16 @@ export function reapplyWhat(frac: Frac, doc: FracDocument | undefined): string {
     const rows = (list: typeof frac.competencies) => list.map(c => `${norm(c.code)}|${norm(c.label)}|${norm(c.type)}`)
     return same(rows(p.competencies), rows(frac.competencies)) ? '' : `${p.competencies.length} competencies`
   }
+  if (doc.kind === 'dictionary' && p.roles && p.competencies) {
+    // The roles side and the competencies side, compared as their own sheets would be
+    const roles = reapplyWhat(frac, { ...doc, kind: 'roles' })
+    const competencies = reapplyWhat(frac, { ...doc, kind: 'competencies' })
+    if (!roles && !competencies) {
+      return ''
+    }
+    const count = p.roles.reduce((n, r) => n + r.activities.length, 0)
+    return `${p.roles.length} roles, ${count} activities and ${p.competencies.length} competencies`
+  }
   if (doc.kind === 'sources' && p.sources && frac.research) {
     const rows = (list: typeof p.sources) => list.filter(s => norm(s.issuer) !== TEAM_DOCUMENT).map(s => `${norm(s.title)}|${norm(s.url)}`)
     return same(rows(p.sources), rows(frac.research.sources)) ? '' : `${p.sources.length} sources`
