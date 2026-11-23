@@ -44,6 +44,10 @@ export const NOTIFICATION_LIMITS = {
   POSITION_SCAN_MAX_USERS: 5000,
   /** Max send-by-topic calls in flight when several positions are selected. */
   SEND_CONCURRENCY: 5,
+  /** Wait after the last keystroke before searching courses on the server. */
+  SEARCH_DEBOUNCE_MS: 300,
+  /** Max rows drawn in the Users / Position panels; the search narrows the rest. Keeps big organisations responsive. */
+  OPTION_RENDER_LIMIT: 200,
 }
 
 /** Fallback logos for items that have no image of their own. */
@@ -111,12 +115,30 @@ export const NOTIFICATION_KIND_CONFIG: Record<NotificationKind, NotificationKind
   },
 }
 
+/** How a notification is delivered: to a topic phones subscribe to, or to specific users' device tokens. */
+export type NotificationDelivery = 'topic' | 'token'
+
 export type NotificationCard = {
   title: string
   description: string
   icon: string
+  delivery: NotificationDelivery
   redirectLink: string | null
 }
+
+/** Sections on the Notifications landing page, one per delivery type. */
+export const NOTIFICATION_SECTIONS: { delivery: NotificationDelivery, title: string, description: string }[] = [
+  {
+    delivery: 'topic',
+    title: 'Topic-based',
+    description: 'Sent to everyone subscribed to an organisation, or to selected positions within it.',
+  },
+  {
+    delivery: 'token',
+    title: 'Token-based',
+    description: 'Sent directly to the devices of the users you select.',
+  },
+]
 
 /** Cards on the Notifications landing page. A null redirectLink renders the card as "Coming soon". */
 export const NOTIFICATION_CARDS: NotificationCard[] = [
@@ -124,24 +146,28 @@ export const NOTIFICATION_CARDS: NotificationCard[] = [
     title: 'Course',
     description: 'Notify learners of an organisation and position about a course.',
     icon: 'menu_book',
+    delivery: 'topic',
     redirectLink: NOTIFICATION_ROUTES.COURSE,
   },
   {
     title: 'Competency',
     description: 'Notify learners of an organisation and position about a competency.',
     icon: 'psychology',
+    delivery: 'topic',
     redirectLink: NOTIFICATION_ROUTES.COMPETENCY,
   },
   {
     title: 'Program',
     description: 'Notify learners of an organisation and position about a program.',
     icon: 'school',
+    delivery: 'topic',
     redirectLink: NOTIFICATION_ROUTES.PROGRAM,
   },
   {
     title: 'Certificate',
     description: 'Notify selected learners of an organisation about a certificate.',
     icon: 'workspace_premium',
+    delivery: 'token',
     redirectLink: NOTIFICATION_ROUTES.CERTIFICATE,
   },
 ]

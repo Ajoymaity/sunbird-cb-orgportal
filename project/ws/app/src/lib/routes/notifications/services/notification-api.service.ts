@@ -41,7 +41,18 @@ interface CourseSearchItem {
 }
 
 interface CourseSearchResponse {
-  result?: { content?: CourseSearchItem[] }
+  result?: { count?: number, content?: CourseSearchItem[] }
+}
+
+/**
+ * A list that may not be complete. `total` is how many exist on the server, so the page can say when it shows fewer:
+ * for courses, all matching courses; for users and positions, all users in the organisation.
+ */
+export interface PartialList<T> {
+  items: T[]
+  total: number
+  /** True when only part of the server's results were loaded. */
+  truncated: boolean
 }
 
 interface EntitySearchItem {
@@ -140,9 +151,12 @@ export class NotificationApiService {
     )
   }
 
-  /** Live courses for the course dropdown, newest first. */
-  getCourses(): Observable<NotificationItem[]> {
-    return this.searchContent(NOTIFICATION_CONTENT_CATEGORIES.COURSE)
+  /**
+   * Live courses matching `query` (all live courses when empty), newest first, at most CONTENT_LIST_LIMIT.
+   * The search runs on the server, so courses beyond the first page are reachable by typing.
+   */
+  getCourses(query = ''): Observable<PartialList<NotificationItem>> {
+    return this.searchContent(NOTIFICATION_CONTENT_CATEGORIES.COURSE, query)
   }
 
   /**
@@ -187,13 +201,14 @@ export class NotificationApiService {
     return [...own, ...Object.values(record).flatMap(child => this.collectPrograms(child))]
   }
 
-  private searchContent(primaryCategory: string[]): Observable<NotificationItem[]> {
+  private searchContent(primaryCategory: string[], query: string): Observable<PartialList<NotificationItem>> {
     const payload = {
       request: {
         filters: {
           primaryCategory,
           status: ['Live'],
         },
+        ...(query.trim() ? { query: query.trim() } : {}),
         limit: NOTIFICATION_LIMITS.CONTENT_LIST_LIMIT,
         offset: 0,
         sort_by: { createdOn: 'desc' },
@@ -201,13 +216,18 @@ export class NotificationApiService {
       },
     }
     return this.http.post<CourseSearchResponse>(API_END_POINTS.COURSE_SEARCH, payload).pipe(
-      map(res => (res?.result?.content || [])
-        .filter(c => !!c.identifier && !!c.name)
-        .map(c => ({
-          identifier: c.identifier as string,
-          name: c.name as string,
-          image: c.posterImage || c.appIcon || '',
-        }))),
+      map(res => {
+        const content = res?.result?.content || []
+        const items = content
+          .filter(c => !!c.identifier && !!c.name)
+          .map(c => ({
+            identifier: c.identifier as string,
+            name: c.name as string,
+            image: c.posterImage || c.appIcon || '',
+          }))
+        const total = res?.result?.count ?? content.length
+        return { items, total, truncated: total > content.length }
+      }),
     )
   }
 
@@ -229,15 +249,15 @@ export class NotificationApiService {
   /**
    * Positions in an organisation: the distinct designations in its users' profiles.
    * This is the value the mobile app subscribes with (`<rootOrgId>_<designation>`), so it is kept exactly as stored.
-   * Pages through the organisation's users, stopping after POSITION_SCAN_MAX_USERS.
+   * Pages through the organisation's users, stopping after POSITION_SCAN_MAX_USERS — `truncated` says when it stopped early.
    */
-  getPositions(orgId: string): Observable<string[]> {
+  getPositions(orgId: string): Observable<PartialList<string>> {
     return this.scanOrgUsers(orgId, ['profileDetails']).pipe(
-      map(users => {
-        const designations = users
+      map(scan => {
+        const designations = scan.items
           .map(user => user.profileDetails?.profileReq?.professionalDetails?.[0]?.designation || '')
           .filter(designation => !!designation.trim())
-        return Array.from(new Set(designations)).sort((a, b) => a.localeCompare(b))
+        return { ...scan, items: Array.from(new Set(designations)).sort((a, b) => a.localeCompare(b)) }
       }),
     )
   }
@@ -246,35 +266,43 @@ export class NotificationApiService {
    * Users of an organisation for the Certificate "Users" picker, sorted by name.
    * User search has no partial-name search, so the list is loaded (up to POSITION_SCAN_MAX_USERS) and filtered in the browser.
    */
-  getOrgUsers(orgId: string): Observable<NotificationUser[]> {
+  getOrgUsers(orgId: string): Observable<PartialList<NotificationUser>> {
     return this.scanOrgUsers(orgId, ['id', 'userId', 'firstName', 'lastName', 'maskedEmail', 'maskedPhone']).pipe(
-      map(users => users
-        .map(user => ({
-          id: String(user.id || user.userId || '').trim(),
-          name: [user.firstName, user.lastName].map(part => (part || '').trim()).filter(part => !!part).join(' '),
-          contact: user.maskedEmail || user.maskedPhone || '',
-        }))
-        .filter(user => !!user.id)
-        .map(user => ({ ...user, name: user.name || 'Unnamed user' }))
-        .sort((a, b) => a.name.localeCompare(b.name))),
+      map(scan => ({
+        ...scan,
+        items: scan.items
+          .map(user => ({
+            id: String(user.id || user.userId || '').trim(),
+            name: [user.firstName, user.lastName].map(part => (part || '').trim()).filter(part => !!part).join(' '),
+            contact: user.maskedEmail || user.maskedPhone || '',
+          }))
+          .filter(user => !!user.id)
+          .map(user => ({ ...user, name: user.name || 'Unnamed user' }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      })),
     )
   }
 
-  /** Pages through an organisation's users, USER_PAGE_SIZE per call, stopping after POSITION_SCAN_MAX_USERS. */
-  private scanOrgUsers(orgId: string, fields: string[]): Observable<UserSearchItem[]> {
+  /**
+   * Pages through an organisation's users, USER_PAGE_SIZE per call, stopping after POSITION_SCAN_MAX_USERS.
+   * If any page fails the whole scan fails, so the caller shows an error instead of a silently incomplete list.
+   */
+  private scanOrgUsers(orgId: string, fields: string[]): Observable<PartialList<UserSearchItem>> {
     const pageSize = NOTIFICATION_LIMITS.USER_PAGE_SIZE
     return this.searchUsers(orgId, 0, fields).pipe(
       switchMap(first => {
-        const total = Math.min(first.count, NOTIFICATION_LIMITS.POSITION_SCAN_MAX_USERS)
+        const scanned = Math.min(first.count, NOTIFICATION_LIMITS.POSITION_SCAN_MAX_USERS)
         const offsets: number[] = []
-        for (let offset = pageSize; offset < total; offset += pageSize) {
+        for (let offset = pageSize; offset < scanned; offset += pageSize) {
           offsets.push(offset)
         }
-        if (!offsets.length) {
-          return of(first.users)
-        }
-        return forkJoin(offsets.map(offset => this.searchUsers(orgId, offset, fields).pipe(map(page => page.users)))).pipe(
-          map(rest => [first.users, ...rest].flat()),
+        const pages$ = offsets.length
+          ? forkJoin(offsets.map(offset => this.searchUsers(orgId, offset, fields).pipe(map(page => page.users)))).pipe(
+            map(rest => [first.users, ...rest].flat()),
+          )
+          : of(first.users)
+        return pages$.pipe(
+          map(items => ({ items, total: first.count, truncated: first.count > scanned })),
         )
       }),
     )

@@ -2,8 +2,8 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit } from '@angular
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { MatSnackBar } from '@angular/material/snack-bar'
-import { EMPTY, Observable, Subject } from 'rxjs'
-import { catchError, distinctUntilChanged, finalize, switchMap, takeUntil, tap } from 'rxjs/operators'
+import { EMPTY, Observable, Subject, merge, of } from 'rxjs'
+import { catchError, debounceTime, distinctUntilChanged, finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators'
 import {
   NOTIFICATION_KIND_CONFIG,
   NOTIFICATION_LIMITS,
@@ -16,6 +16,7 @@ import {
   NotificationItem,
   NotificationOrg,
   NotificationUser,
+  PartialList,
   TopicSendResult,
 } from '../../services/notification-api.service'
 
@@ -70,10 +71,13 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
   /** Positions of the selected organisation — reloaded whenever the organisation changes. */
   positions: string[] = []
   filteredPositions: string[] = []
+  /** The first OPTION_RENDER_LIMIT of the filtered list — what the panel actually draws. */
+  visiblePositions: string[] = []
   userSearch = ''
   /** Certificate only: users of the selected organisation — reloaded whenever the organisation changes. */
   users: NotificationUser[] = []
   filteredUsers: NotificationUser[] = []
+  visibleUsers: NotificationUser[] = []
   loadingUsers = false
   loadingOrganisations = false
   loadingItems = false
@@ -81,6 +85,31 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
   sending = false
   imageFailed = false
 
+  /** Load failures, shown with a "Try again" link instead of a misleading "none found". */
+  itemsError = false
+  positionsError = false
+  usersError = false
+  /** How much of each list was loaded. `*Total` is the server's count: matching courses, or the organisation's users. */
+  itemsTotal = 0
+  itemsTruncated = false
+  orgUsersTotal = 0
+  positionsTruncated = false
+  usersTruncated = false
+
+  /** Selections as Sets — the panels check every row on each change, so lookups must be constant time. */
+  selectedPositions = new Set<string>()
+  selectedUserIds = new Set<string>()
+
+  readonly renderLimit = NOTIFICATION_LIMITS.OPTION_RENDER_LIMIT
+  readonly positionsScanLimit = NOTIFICATION_LIMITS.POSITION_SCAN_MAX_USERS
+
+  private userNameById = new Map<string, string>()
+  /** The chosen item, kept so it stays selected when a new course search replaces the list. */
+  private pickedItem?: NotificationItem
+  private readonly courseSearch$ = new Subject<string>()
+  private readonly retryItems$ = new Subject<void>()
+  private readonly retryPositions$ = new Subject<void>()
+  private readonly retryUsers$ = new Subject<void>()
   private readonly destroy$ = new Subject<void>()
 
   constructor(
@@ -98,7 +127,9 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
       return
     }
     const wrapper = this.elRef.nativeElement.querySelector(`[data-dropdown="${this.openDropdown}"]`)
-    if (wrapper && !wrapper.contains(event.target as Node)) {
+    // composedPath() is captured when the click happens, so it still includes a button that the click itself
+    // removed (e.g. "Clear" hides itself) — event.target would already be detached and look like an outside click.
+    if (wrapper && !event.composedPath().includes(wrapper)) {
       this.closeDropdown()
     }
   }
@@ -112,11 +143,20 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
     if (this.isCertificate) {
       this.form.controls.userIds.setValidators(Validators.required)
     }
+    this.form.controls.positions.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(values => {
+      this.selectedPositions = new Set(values)
+    })
+    this.form.controls.userIds.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(values => {
+      this.selectedUserIds = new Set(values)
+    })
     this.resetForm()
     this.loadOrganisations()
-    // Programs belong to an organisation, so they load when one is picked; the other lists load now.
+    // Programs belong to an organisation, so they load when one is picked. Courses are searched on the server
+    // as the admin types; competencies are one short list loaded now.
     if (this.itemsNeedOrg) {
       this.watchOrgForPrograms()
+    } else if (this.searchesOnServer) {
+      this.watchCourseSearch()
     } else {
       this.loadItems()
     }
@@ -139,11 +179,19 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
 
   get selectedItem(): NotificationItem | undefined {
     const id = this.form.controls.itemId.value
-    return this.items.find(i => i.identifier === id)
+    if (!id) {
+      return undefined
+    }
+    return this.items.find(i => i.identifier === id) || (this.pickedItem?.identifier === id ? this.pickedItem : undefined)
+  }
+
+  /** Courses are too many to load at once, so the Course list is searched on the server. */
+  get searchesOnServer(): boolean {
+    return this.kind === 'course'
   }
 
   /** Text in the closed Course / Competency / Program field when nothing is selected. */
-  get itemPlaceholder(): string {
+  get itemPlaceholderText(): string {
     if (this.itemsNeedOrg && !this.form.controls.orgId.value) {
       return 'Select an organisation first'
     }
@@ -161,9 +209,8 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
     if (!selected.length) {
       return this.loadingUsers ? 'Loading...' : 'Select users'
     }
-    const byId = new Map(this.users.map(user => [user.id, user.name]))
     // Long lists are cut off with an ellipsis by the field's CSS; the full list is in the tooltip.
-    return selected.map(id => byId.get(id) || id).join(', ')
+    return selected.map(id => this.userNameById.get(id) || id).join(', ')
   }
 
   /** Count line shown at the top of the open Users panel. */
@@ -228,14 +275,21 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
         .filter(o => o.name.toLowerCase().includes(query) || o.id.toLowerCase().includes(query))
     } else if (key === 'item') {
       this.itemSearch = term
+      if (this.searchesOnServer) {
+        // The server filters courses; the results replace the list when they arrive.
+        this.courseSearch$.next(term)
+        return
+      }
       this.filteredItems = this.items
         .filter(i => i.name.toLowerCase().includes(query) || i.identifier.toLowerCase().includes(query))
     } else if (key === 'position') {
       this.positionSearch = term
       this.filteredPositions = this.positions.filter(p => p.toLowerCase().includes(query))
+      this.visiblePositions = this.filteredPositions.slice(0, this.renderLimit)
     } else {
       this.userSearch = term
       this.filteredUsers = this.users.filter(u => [u.name, u.contact, u.id].some(v => v.toLowerCase().includes(query)))
+      this.visibleUsers = this.filteredUsers.slice(0, this.renderLimit)
     }
   }
 
@@ -246,20 +300,21 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
   }
 
   selectItem(id: string): void {
+    this.pickedItem = this.items.find(i => i.identifier === id)
     this.form.controls.itemId.setValue(id)
     this.form.controls.itemId.markAsTouched()
     this.closeDropdown()
   }
 
   isPositionSelected(position: string): boolean {
-    return this.form.controls.positions.value.includes(position)
+    return this.selectedPositions.has(position)
   }
 
   /** Ticks or unticks a position; the panel stays open so several can be picked. */
   togglePosition(position: string): void {
     const selected = this.form.controls.positions.value
     this.form.controls.positions.setValue(
-      selected.includes(position) ? selected.filter(p => p !== position) : [...selected, position],
+      this.selectedPositions.has(position) ? selected.filter(p => p !== position) : [...selected, position],
     )
   }
 
@@ -268,19 +323,40 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
   }
 
   isUserSelected(userId: string): boolean {
-    return this.form.controls.userIds.value.includes(userId)
+    return this.selectedUserIds.has(userId)
   }
 
   /** Ticks or unticks a user; the panel stays open so several can be picked. */
   toggleUser(userId: string): void {
     const selected = this.form.controls.userIds.value
     this.form.controls.userIds.setValue(
-      selected.includes(userId) ? selected.filter(id => id !== userId) : [...selected, userId],
+      this.selectedUserIds.has(userId) ? selected.filter(id => id !== userId) : [...selected, userId],
     )
     this.form.controls.userIds.markAsTouched()
   }
 
-  /** Ticks every user currently shown by the search, keeping earlier picks. */
+  trackByUser(_index: number, user: NotificationUser): string {
+    return user.id
+  }
+
+  trackByValue(_index: number, value: string): string {
+    return value
+  }
+
+  /** Re-runs a list load that failed. */
+  retry(list: 'item' | 'position' | 'user'): void {
+    if (list === 'position') {
+      this.retryPositions$.next()
+    } else if (list === 'user') {
+      this.retryUsers$.next()
+    } else if (this.searchesOnServer || this.itemsNeedOrg) {
+      this.retryItems$.next()
+    } else {
+      this.loadItems()
+    }
+  }
+
+  /** Ticks every user matching the search (not only the rows drawn), keeping earlier picks. */
   selectShownUsers(): void {
     const selected = new Set(this.form.controls.userIds.value)
     this.filteredUsers.forEach(user => selected.add(user.id))
@@ -404,31 +480,66 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
 
   /** Reloads the Program list each time the organisation changes. */
   private watchOrgForPrograms(): void {
-    this.reloadOnOrgChange(
-      () => {
+    this.reloadOnOrgChange({
+      clear: () => {
         this.form.controls.itemId.setValue('')
         this.items = []
         this.filteredItems = []
         this.itemSearch = ''
       },
-      orgId => this.notificationApi.getPrograms(orgId),
-      loading => { this.loadingItems = loading },
-      items => {
+      load: orgId => this.notificationApi.getPrograms(orgId),
+      apply: items => {
         this.items = items
         this.onSearch('item', this.itemSearch)
       },
-    )
+      setLoading: loading => { this.loadingItems = loading },
+      setError: error => { this.itemsError = error },
+      retry$: this.retryItems$,
+    })
+  }
+
+  /**
+   * Course list: searched on the server as the admin types (debounced), so every live course is reachable,
+   * not just the first CONTENT_LIST_LIMIT. A newer search cancels an older one.
+   */
+  private watchCourseSearch(): void {
+    merge(
+      this.courseSearch$.pipe(
+        debounceTime(NOTIFICATION_LIMITS.SEARCH_DEBOUNCE_MS),
+        map(term => term.trim()),
+        distinctUntilChanged(),
+      ),
+      this.retryItems$.pipe(map(() => this.itemSearch.trim())),
+    ).pipe(
+      tap(() => {
+        this.loadingItems = true
+        this.itemsError = false
+      }),
+      switchMap(term => this.notificationApi.getCourses(term).pipe(
+        catchError(() => of<PartialList<NotificationItem> | null>(null)),
+      )),
+      takeUntil(this.destroy$),
+    ).subscribe(list => {
+      this.loadingItems = false
+      this.itemsError = !list
+      this.items = list?.items || []
+      this.filteredItems = this.items
+      this.itemsTotal = list?.total || 0
+      this.itemsTruncated = !!list?.truncated
+    })
+    this.courseSearch$.next('')
   }
 
   private loadItems(): void {
     const sources: Record<Exclude<NotificationKind, 'program'>, () => Observable<NotificationItem[]>> = {
-      course: () => this.notificationApi.getCourses(),
+      course: () => this.notificationApi.getCourses().pipe(map(list => list.items)),
       competency: () => this.notificationApi.getCompetencies(),
       // A certificate is for a competency, so the Certificate page lists competencies.
       certificate: () => this.notificationApi.getCompetencies(),
     }
     const items$ = sources[this.kind as Exclude<NotificationKind, 'program'>]()
     this.loadingItems = true
+    this.itemsError = false
     items$.pipe(
       finalize(() => { this.loadingItems = false }),
       takeUntil(this.destroy$),
@@ -440,76 +551,97 @@ export class SendNotificationComponent implements OnInit, OnDestroy {
       error: () => {
         this.items = []
         this.filteredItems = []
+        this.itemsError = true
       },
     })
   }
 
   /** Reloads the Position list each time the organisation changes. */
   private watchOrgForPositions(): void {
-    this.reloadOnOrgChange(
-      () => {
+    this.reloadOnOrgChange({
+      clear: () => {
         this.form.controls.positions.setValue([])
         this.positions = []
         this.filteredPositions = []
+        this.visiblePositions = []
         this.positionSearch = ''
+        this.positionsTruncated = false
       },
-      orgId => this.notificationApi.getPositions(orgId),
-      loading => { this.loadingPositions = loading },
-      positions => {
-        this.positions = positions
+      load: orgId => this.notificationApi.getPositions(orgId),
+      apply: list => {
+        this.positions = list.items
+        this.orgUsersTotal = list.total
+        this.positionsTruncated = list.truncated
         this.onSearch('position', this.positionSearch)
       },
-    )
+      setLoading: loading => { this.loadingPositions = loading },
+      setError: error => { this.positionsError = error },
+      retry$: this.retryPositions$,
+    })
   }
 
   /** Certificate only: reloads the Users list each time the organisation changes. */
   private watchOrgForUsers(): void {
-    this.reloadOnOrgChange(
-      () => {
+    this.reloadOnOrgChange({
+      clear: () => {
         this.form.controls.userIds.setValue([])
         this.users = []
         this.filteredUsers = []
+        this.visibleUsers = []
+        this.userNameById = new Map()
         this.userSearch = ''
+        this.usersTruncated = false
       },
-      orgId => this.notificationApi.getOrgUsers(orgId),
-      loading => { this.loadingUsers = loading },
-      users => {
-        this.users = users
+      load: orgId => this.notificationApi.getOrgUsers(orgId),
+      apply: list => {
+        this.users = list.items
+        this.userNameById = new Map(list.items.map(user => [user.id, user.name]))
+        this.orgUsersTotal = list.total
+        this.usersTruncated = list.truncated
         this.onSearch('user', this.userSearch)
       },
-    )
+      setLoading: loading => { this.loadingUsers = loading },
+      setError: error => { this.usersError = error },
+      retry$: this.retryUsers$,
+    })
   }
 
   /**
-   * Shared wiring for lists that depend on the organisation: clear on every change, then load for the new one.
-   * switchMap means a newer selection cancels the older load; a failed load leaves the list empty.
+   * Shared wiring for lists that depend on the organisation: clear on every change, then load for the new one;
+   * `retry$` reloads for the current organisation. switchMap means a newer selection cancels the older load.
+   * A failed load sets the error flag, so the page offers "Try again" rather than claiming the list is empty.
    */
-  private reloadOnOrgChange<T>(
-    clear: () => void,
-    load: (orgId: string) => Observable<T>,
-    setLoading: (loading: boolean) => void,
-    apply: (result: T) => void,
-  ): void {
-    this.form.controls.orgId.valueChanges.pipe(
-      distinctUntilChanged(),
-      tap(() => clear()),
+  private reloadOnOrgChange<T>(opts: {
+    clear: () => void
+    load: (orgId: string) => Observable<T>
+    apply: (result: T) => void
+    setLoading: (loading: boolean) => void
+    setError: (error: boolean) => void
+    retry$: Observable<void>
+  }): void {
+    merge(
+      this.form.controls.orgId.valueChanges.pipe(distinctUntilChanged(), tap(() => opts.clear())),
+      opts.retry$.pipe(map(() => this.form.controls.orgId.value)),
+    ).pipe(
+      tap(() => opts.setError(false)),
       switchMap(orgId => {
         if (!orgId) {
-          setLoading(false)
+          opts.setLoading(false)
           return EMPTY
         }
-        setLoading(true)
-        return load(orgId).pipe(
+        opts.setLoading(true)
+        return opts.load(orgId).pipe(
           catchError(() => {
-            setLoading(false)
+            opts.setLoading(false)
+            opts.setError(true)
             return EMPTY
           }),
         )
       }),
       takeUntil(this.destroy$),
     ).subscribe(result => {
-      apply(result)
-      setLoading(false)
+      opts.apply(result)
+      opts.setLoading(false)
     })
   }
 }

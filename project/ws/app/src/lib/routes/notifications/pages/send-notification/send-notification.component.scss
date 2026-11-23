@@ -355,6 +355,23 @@
     font-size: 12px;
   }
 
+  // Notes inside a dropdown panel: list cut short, or failed to load.
+  .list-note {
+    color: #808080;
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  .dropdown-option.load-error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    color: #ca0000;
+    // .disabled sets pointer-events: none; the "Try again" link inside must stay clickable.
+    pointer-events: auto;
+  }
+
   .selection-actions {
     display: inline-flex;
     gap: 12px;

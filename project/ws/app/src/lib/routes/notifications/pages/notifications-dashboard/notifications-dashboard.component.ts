@@ -1,6 +1,10 @@
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
-import { NOTIFICATION_CARDS, NotificationCard } from '../../constants/notifications.constants'
+import {
+  NOTIFICATION_CARDS,
+  NOTIFICATION_SECTIONS,
+  NotificationCard,
+} from '../../constants/notifications.constants'
 
 @Component({
   selector: 'ws-app-notifications-dashboard',
@@ -9,7 +13,11 @@ import { NOTIFICATION_CARDS, NotificationCard } from '../../constants/notificati
   standalone: false,
 })
 export class NotificationsDashboardComponent {
-  readonly cards: NotificationCard[] = NOTIFICATION_CARDS
+  /** Cards grouped by delivery type: topic-based first, then token-based. */
+  readonly sections = NOTIFICATION_SECTIONS.map(section => ({
+    ...section,
+    cards: NOTIFICATION_CARDS.filter(card => card.delivery === section.delivery),
+  }))
 
   constructor(private readonly router: Router) { }
 

@@ -70,7 +70,7 @@
               <ng-container *ngIf="selectedItem; else itemPlaceholder">
                 {{ selectedItem.name }} <span class="option-id">({{ selectedItem.identifier }})</span>
               </ng-container>
-              <ng-template #itemPlaceholder>{{ itemPlaceholder }}</ng-template>
+              <ng-template #itemPlaceholder>{{ itemPlaceholderText }}</ng-template>
             </span>
           </button>
           <div class="dropdown-panel" *ngIf="openDropdown === 'item'">
@@ -81,8 +81,15 @@
                 (input)="onSearch('item', $any($event.target).value)" (keydown.escape)="closeDropdown()" />
             </div>
             <div *ngIf="loadingItems" class="dropdown-option disabled">Loading...</div>
-            <div *ngIf="!loadingItems && filteredItems.length === 0" class="dropdown-option disabled">
+            <div *ngIf="!loadingItems && itemsError" class="dropdown-option disabled load-error">
+              Couldn't load the {{ config.itemLabel.toLowerCase() }} list.
+              <button type="button" class="clear-link" (click)="retry('item')">Try again</button>
+            </div>
+            <div *ngIf="!loadingItems && !itemsError && filteredItems.length === 0" class="dropdown-option disabled">
               No {{ config.itemLabel.toLowerCase() }} found
+            </div>
+            <div *ngIf="!loadingItems && itemsTruncated" class="dropdown-option disabled list-note">
+              Showing {{ filteredItems.length }} of {{ itemsTotal }} — type to search for others
             </div>
             <button type="button" *ngFor="let option of filteredItems" class="dropdown-option"
               [class.selected]="option.identifier === form.controls.itemId.value" (click)="selectItem(option.identifier)">
@@ -121,13 +128,16 @@
               </div>
             </div>
             <div *ngIf="loadingPositions" class="dropdown-option disabled">Loading...</div>
-            <ng-container *ngIf="!loadingPositions">
+            <ng-container *ngIf="!loadingPositions && !positionsError">
               <div *ngIf="filteredPositions.length === 0" class="dropdown-option disabled">No position found</div>
-              <label *ngFor="let option of filteredPositions" class="dropdown-option checkbox-option"
+              <label *ngFor="let option of visiblePositions; trackBy: trackByValue" class="dropdown-option checkbox-option"
                 [class.selected]="isPositionSelected(option)">
                 <input type="checkbox" [checked]="isPositionSelected(option)" (change)="togglePosition(option)" />
                 <span>{{ option }}</span>
               </label>
+              <div *ngIf="filteredPositions.length > visiblePositions.length" class="dropdown-option disabled list-note">
+                Showing {{ visiblePositions.length }} of {{ filteredPositions.length }} — type to narrow the list
+              </div>
             </ng-container>
           </div>
           <span class="select-arrow">
@@ -136,8 +146,16 @@
             </svg>
           </span>
         </div>
-        <div *ngIf="form.controls.orgId.value && !loadingPositions && positions.length === 0" class="field-hint">
+        <div *ngIf="form.controls.orgId.value && !loadingPositions && positionsError" class="field-error-text">
+          Couldn't load positions for this organisation.
+          <button type="button" class="clear-link" (click)="retry('position')">Try again</button>
+        </div>
+        <div *ngIf="form.controls.orgId.value && !loadingPositions && !positionsError && positions.length === 0" class="field-hint">
           No positions found for this organisation
+        </div>
+        <div *ngIf="!loadingPositions && positionsTruncated" class="field-hint">
+          Positions are from the first {{ positionsScanLimit | number }} of {{ orgUsersTotal | number }} users,
+          so some may be missing.
         </div>
       </div>
 
@@ -162,7 +180,7 @@
                 <span>{{ userSelectionText }}</span>
                 <span class="selection-actions">
                   <button type="button" class="clear-link" *ngIf="filteredUsers.length" (click)="selectShownUsers()">
-                    Select all shown
+                    Select all matching ({{ filteredUsers.length | number }})
                   </button>
                   <button type="button" class="clear-link" *ngIf="form.controls.userIds.value.length"
                     (click)="clearUsers()">Clear</button>
@@ -170,9 +188,9 @@
               </div>
             </div>
             <div *ngIf="loadingUsers" class="dropdown-option disabled">Loading...</div>
-            <ng-container *ngIf="!loadingUsers">
+            <ng-container *ngIf="!loadingUsers && !usersError">
               <div *ngIf="filteredUsers.length === 0" class="dropdown-option disabled">No user found</div>
-              <label *ngFor="let user of filteredUsers" class="dropdown-option checkbox-option"
+              <label *ngFor="let user of visibleUsers; trackBy: trackByUser" class="dropdown-option checkbox-option"
                 [class.selected]="isUserSelected(user.id)">
                 <input type="checkbox" [checked]="isUserSelected(user.id)" (change)="toggleUser(user.id)" />
                 <span>
@@ -180,6 +198,9 @@
                   <span class="option-id">({{ user.contact ? user.contact + ' · ' : '' }}{{ user.id }})</span>
                 </span>
               </label>
+              <div *ngIf="filteredUsers.length > visibleUsers.length" class="dropdown-option disabled list-note">
+                Showing {{ visibleUsers.length }} of {{ filteredUsers.length | number }} — type to narrow the list
+              </div>
             </ng-container>
           </div>
           <span class="select-arrow">
@@ -191,8 +212,15 @@
         <div *ngIf="form.controls.userIds.touched && form.controls.userIds.invalid" class="field-error-text">
           Select at least one user
         </div>
-        <div *ngIf="form.controls.orgId.value && !loadingUsers && users.length === 0" class="field-hint">
+        <div *ngIf="form.controls.orgId.value && !loadingUsers && usersError" class="field-error-text">
+          Couldn't load users for this organisation.
+          <button type="button" class="clear-link" (click)="retry('user')">Try again</button>
+        </div>
+        <div *ngIf="form.controls.orgId.value && !loadingUsers && !usersError && users.length === 0" class="field-hint">
           No users found for this organisation
+        </div>
+        <div *ngIf="!loadingUsers && usersTruncated" class="field-hint">
+          Only the first {{ users.length | number }} of {{ orgUsersTotal | number }} users are listed.
         </div>
       </div>
     </div>
